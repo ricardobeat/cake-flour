@@ -10,7 +10,7 @@ It adds a bunch of functions to global scope:
 - `lint(file, [options], [globals])`: check javascript syntax using JSHint 
 - `compile(file, [dest], [cb])`: compile LESS or CoffeeScript files (automatic)
 - `bundle(output, filesArray)`: compile, minify and concat a group of files
-- `minify(file, [dest], [cb]): yeah.
+- `minify(file, [dest], [cb])`: minify files using uglify-js
 - `watch(file, fn)`: do something when file changes. Accepts an array of filenames
 
 (If that hurts your feelings you can remove them with `flour.noConflict()`. That will bring the global object to it's previous state)
