@@ -37,18 +37,24 @@ flour =
     compileCoffee: (code, cb) ->
         cb ';' + coffee.compile code
 
-    compileLess: (code, paths = [], cb) ->
-        parser = new less.Parser { paths }
+    compileLess: (code, dir, cb) ->
+        parser = new less.Parser { paths: [dir] }
         parser.parse code, (err, tree) ->
             throw err if err
-            cb tree.toCSS(compress: true)
+            dependencies = (path.join(dir,rule.path) for rule in tree.rules when rule.path?)
+            cb tree.toCSS(compress: true), dependencies
 
-    compile: (file, dest, cb) ->
+    compile: (file, dest, cb) -> # file, dest|cb, cb|watch
         if typeof dest is 'function' then [cb, dest] = [dest, null]
         ext = path.extname file
 
-        success = (output) ->
-            finishAction 'Compiled', file, output, dest, cb
+        if ext is '.less' and cb is true
+            flour.watchCompile file, dest, cb
+            return
+
+        success = (output, dependencies) ->
+            finishAction 'Compiled', file, output, dest, (output) ->
+                cb? output, dependencies
 
         fs.readFile file, 'utf8', (err, code) ->
             failed(file, err) if err
@@ -58,7 +64,7 @@ flour =
                 when '.coffee'
                     flour.compileCoffee code, success
                 when '.less'
-                    flour.compileLess code, [path.dirname file], success
+                    flour.compileLess code, path.dirname(file), success
         return
 
     minifyJS: (code, cb) ->
@@ -117,17 +123,21 @@ flour =
         return
 
     watch: (files, fn) ->
-        if not (files instanceof Array)
-            flour.watchFile files, fn
-        else
-            flour.watchFile file, fn for file in files
+        if not (files instanceof Array) then files = [file]
+        for file in files
+            flour.watchFile file, fn
+
+    watchCompile: (file, dest, fn) ->
+        flour.watchFile file, -> flour.compile file, dest
+        flour.compile file, dest, (output, dependencies) ->
+            watch dependencies, -> flour.compile file, dest
 
     noConflict: ->
         for m in globals
             delete global[m]
             if global['_'+m]? then global[m] = global['_'+m]
 
-globals = ['lint', 'compile', 'bundle', 'minify', 'watch']
+globals = ['lint', 'compile', 'bundle', 'minify', 'watch', 'watchCompile']
 
 for m in globals
     if global[m]? then global['_'+m] = global[m]
