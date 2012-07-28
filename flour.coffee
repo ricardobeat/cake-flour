@@ -12,8 +12,15 @@ failed = (file, err) ->
     console.error err
     process.exit 1
 
-flour =
+# write to file if an output path was provided
+# otherwise just return the result to the callback
+finishAction = (action, file, output, dest, cb) ->
+    console.log action.magenta, file, '@', new Date().toLocaleTimeString()
+    if not dest? then return cb output
+    fs.writeFile dest, output, (err) -> cb? output
 
+# main object
+flour =
     lint: (files, options = {}, globals = {}) ->
         if not (files instanceof Array)
             files = [files]
@@ -36,22 +43,15 @@ flour =
             throw err if err
             cb tree.toCSS(compress: true)
 
-    # compile LESS/CoffeeScript
     compile: (file, dest, cb) ->
-        if typeof dest is 'function' then cb = dest
+        if typeof dest is 'function' then [cb, dest] = [dest, null]
         ext = path.extname file
-        source = null
 
         success = (output) ->
-            console.log "Compiled".magenta, file, '@', new Date().toLocaleTimeString()
-            if dest?
-                return fs.writeFile dest, output, (err) ->
-                    cb? output
-            cb output
+            finishAction 'Compiled', file, output, dest, cb
 
         fs.readFile file, 'utf8', (err, code) ->
             failed(file, err) if err
-            source = code
             switch ext
                 when '.js'
                     cb ';' + code
@@ -66,13 +66,20 @@ flour =
         output = pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
         cb output
 
-    minify: (file, cb) ->
+    minify: (file, dest, cb) ->
+        if typeof dest is 'function' then [cb, dest] = [dest, null]
+        ext = path.extname file
+
+        success = (output) ->
+            finishAction 'Minified', file, output, dest, cb
+
         fs.readFile file, 'utf8', (err, data) ->
             failed(source, err) if err
-            if /js|coffee/.test path.extname file
-                flour.minifyJS data, cb
-            else
-                cb data
+            switch ext
+                when '.js', '.coffee'
+                    flour.minifyJS data, success
+                else
+                    success data
 
     # concatenate and minify files -> dest
     # optional callback
