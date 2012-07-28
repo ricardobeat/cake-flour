@@ -1,0 +1,32 @@
+{
+  "name": "flour",
+  "version": "0.0.1",
+  "description": "Simple build tools for Cakefiles",
+  "main": "flour.coffee",
+  "scripts": {
+    "test": ""
+  },
+  "dependencies": {
+    "less": "",
+    "coffee-script": "",
+    "colors": "",
+    "uglify-js": "",
+    "jshint": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ricardobeat/cake-flour.git"
+  },
+  "keywords": [
+    "cakefile",
+    "cake",
+    "build",
+    "tools",
+    "watch",
+    "compile",
+    "minify",
+    "coffee-script"
+  ],
+  "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
+  "license": "MIT (ricardo.mit-license.org)"
+}
