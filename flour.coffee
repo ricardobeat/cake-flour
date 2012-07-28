@@ -12,7 +12,7 @@ failed = (file, err) ->
     console.error err
     process.exit 1
 
-module.exports =
+flour =
 
     lint: (files, options = {}, globals = {}) ->
         if not (files instanceof Array)
@@ -56,9 +56,9 @@ module.exports =
                 when '.js'
                     cb ';' + code
                 when '.coffee'
-                    compileCoffee code, success
+                    flour.compileCoffee code, success
                 when '.less'
-                    compileLess code, [path.dirname file], success
+                    flour.compileLess code, [path.dirname file], success
         return
 
     minifyJS: (code, cb) ->
@@ -70,7 +70,7 @@ module.exports =
         fs.readFile file, 'utf8', (err, data) ->
             failed(source, err) if err
             if /js|coffee/.test path.extname file
-                minifyJS data, cb
+                flour.minifyJS data, cb
             else
                 cb data
 
@@ -80,7 +80,7 @@ module.exports =
 
         ext = path.extname files[0]
         passthrough = (c, cb) -> cb c
-        min = if /js|coffee/.test(ext) then minifyJS else passthrough
+        min = if /js|coffee/.test(ext) then flour.minifyJS else passthrough
 
         results = []
         done = 0
@@ -90,7 +90,7 @@ module.exports =
                 console.log "Packaged".magenta, dest
 
         files.forEach (file, i) ->
-            compile file, (code) ->
+            flour.compile file, (code) ->
                 results[i] = code
                 if files.length is ++done
                     results = results.join "\n"
@@ -111,9 +111,19 @@ module.exports =
 
     watch: (files, fn) ->
         if not (files instanceof Array)
-            watchFile files, fn
+            flour.watchFile files, fn
         else
-            watchFile file, fn for file in files
+            flour.watchFile file, fn for file in files
 
-for key, val of module.exports
-    global[key] = val
+    noConflict: ->
+        for m in globals
+            delete global[m]
+            if global['_'+m]? then global[m] = global['_'+m]
+
+globals = ['lint', 'compile', 'bundle', 'minify', 'watch']
+
+for m in globals
+    if global[m]? then global['_'+m] = global[m]
+    global[m] = flour[m]
+
+module.exports = flour
