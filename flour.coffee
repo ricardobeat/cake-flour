@@ -1,133 +1,97 @@
 fs     = require 'fs'
 path   = require 'path'
+util   = require 'util'
 domain = require 'domain'
-less   = require 'less'
-coffee = require 'coffee-script'
 colors = require 'colors'
-uglify = require 'uglify-js'
-jshint = (require 'jshint').JSHINT
 
-# generic error handler
-failed = (file, e) ->
-    console.error "Error compiling".red.inverse, file.toString()
-    if e.type and e.filename
-        console.error "[L#{e.line}:C#{e.column}]".yellow,
-            "#{e.type} error".yellow
-            "in #{e.filename}:".grey
-            e.message
-    else
-        console.error e.type.yellow, e.message.grey
+# File abstraction to avoid repeat I/O
+class File
+    constructor: (file, @buffer) ->
+        return file if file instanceof File
+        @path = file
+        @ext  = path.extname file
+        @name = path.basename file
+        @base = path.basename file, @ext
+        @dir  = path.dirname file
+    read: (cb) ->
+        return cb @buffer if @buffer?
+        fs.readFile @path, (err, data) ->
+            throw err if err
+            cb @buffer = data.toString()
+    toString: ->
+        @path
 
-# write to file if an output path was provided
-# otherwise just return the result to the callback
+passthrough = (file, cb) -> file.read cb
+
+minifiers =
+    '.coffee': passthrough
+    '.less': passthrough
+
+    '.js': (file, cb) ->
+        { parser: jsp, uglify: pro } = require 'uglify-js'
+        file.read (code) ->
+            cb pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
+
+    '.css': (file, cb) ->
+        # TBD, LESS already compresses output
+        file.read cb
+
+compilers = 
+    '.js': passthrough
+    '.css': passthrough
+
+    '.coffee': (file, cb) ->
+        coffee = require 'coffee-script'
+        file.read (code) ->
+            cb coffee.compile code
+
+    '.less': (file, cb) ->
+        less = require 'less'
+        parser = new less.Parser { paths: [file.dir] }
+        file.read (code) ->
+            parser.parse code, (err, tree) ->
+                throw err if err
+                cb tree.toCSS(compress: true)
+
+linters =
+
+    '.js': (file, args, cb) ->
+        # accepts options: flour.lint 'file.js', [options], [globals]
+        jshint = (require 'jshint').JSHINT
+        file.read (code) ->
+            passed = jshint.apply jshint, [code].concat(args)
+            cb passed, jshint.errors
+
+# Success handler. Writes to file if an output path was
+# provided, otherwise it just returns the result
 finishAction = (action, file, output, dest, cb) ->
     console.log action.magenta, file.toString(), '@', new Date().toLocaleTimeString()
     if not dest? then return cb output
     fs.writeFile dest, output, (err) -> cb? output
 
-class File
-    constructor: (file) ->
-        return file if file instanceof File
-        @path = file
-        @ext  = path.extname(file)[1..]
-        @name = path.basename file
-        @base = path.basename file, @ext
-        @dir  = path.dirname file
-    read: (cb) ->
-        fs.readFile @path, (err, data) ->
-            cb err, data?.toString()
-    toString: ->
-        @path
-
-# main object
+# Main object
 flour =
-    lint: (files, options = {}, globals = {}) ->
-        if not (files instanceof Array)
-            files = [files]
-        for file in files
-            result = jshint fs.readFileSync(file).toString(), options, globals
-            if result
-                console.log "OK".green.inverse, file
-            else
-                console.log "NOT OK".magenta.inverse, file.bold
-                for e in jshint.errors
-                    pos = "[L#{e.line}:C#{e.character}]"
-                    console.log pos.red, e.reason.grey
-        
-    compileCoffee: (code, cb) ->
-        cb ';' + coffee.compile code
 
-    compileLess: (code, paths = [], cb) ->
-        parser = new less.Parser { paths }
-        parser.parse code, (err, tree) ->
-            throw err if err
-            cb tree.toCSS(compress: true)
+    lint: (file, args...) ->
+        linters[file.ext] file, args, (passed, errors) ->
+            if passed
+                console.log "OK".green.inverse, file.path
+                return
+        
+            for e in errors
+                pos = "[L#{e.line}:C#{e.character}]"
+                console.log pos.red, e.reason.grey
+                console.log "NOT OK".magenta.inverse, file.path.bold
 
     compile: (file, dest, cb) ->
-        compileDomain = domain.create()
-        compileDomain.on 'error', (err) -> failed file, err
-    
-        if typeof dest is 'function' then [cb, dest] = [dest, null]
-        file = new File file
-
-        success = (output) ->
+        compilers[file.ext] file, (output) ->
             finishAction 'Compiled', file, output, dest, cb
 
-        file.read compileDomain.bind (err, code) ->
-            switch file.ext
-                when 'js'
-                    cb ';' + code
-                when 'coffee'
-                    flour.compileCoffee code, success
-                when 'less'
-                    flour.compileLess code, [file.dir], success
-        return
-
-    minifyJS: (code, cb) ->
-        { parser: jsp, uglify: pro } = uglify
-        output = pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
-        cb output
-
     minify: (file, dest, cb) ->
-        if typeof dest is 'function' then [cb, dest] = [dest, null]
-        file = new File file
-
-        success = (output) ->
+        minifiers[file.ext] file, (output) ->
             finishAction 'Minified', file, output, dest, cb
 
-        file.read (err, data) ->
-            failed(file, err) if err
-            switch ext
-                when 'js', 'coffee'
-                    flour.minifyJS data, success
-                else
-                    success data
-
-    # concatenate and minify files -> dest
-    # optional callback
-    bundle: (dest, files, cb) ->
-
-        ext = path.extname files[0]
-        passthrough = (c, cb) -> cb c
-        min = if /js|coffee/.test(ext) then flour.minifyJS else passthrough
-
-        results = []
-        done = 0
-
-        writeBundle = (results) ->
-            fs.writeFile dest, results, 'utf8', ->
-                console.log "Packaged".magenta, dest
-
-        files.forEach (file, i) ->
-            flour.compile file, (code) ->
-                results[i] = code
-                if files.length is ++done
-                    results = results.join "\n"
-                    min results, writeBundle
-
-    watchFile: (file, fn) ->
-        file = new File file
-
+    watch: (file, fn) ->
         lastChange = 0
         try
             fs.watch file.path, (event, filename) ->
@@ -140,20 +104,82 @@ flour =
             console.error "Error watching".red, file.path
         return
 
-    watch: (files, fn) ->
-        if not (files instanceof Array)
-            flour.watchFile files, fn
-        else
-            flour.watchFile file, fn for file in files
+    bundle: (dest, files, cb) ->
+        results = []
+        counter = 0
+
+        done = ->
+            return unless files.length is ++counter
+            shim = new File dest, results.join("\n")
+            minifiers[shim.ext] shim, (output) ->
+                finishAction 'Packaged', shim, output, dest, cb
+
+        files.forEach (file, i) ->
+            file = new File file
+            compilers[file.ext] file, (code) ->
+                results[i] = code
+                done()
+
+        return
 
     noConflict: ->
         for m in globals
             delete global[m]
             if global['_'+m]? then global[m] = global['_'+m]
+        return
 
-globals = ['lint', 'compile', 'bundle', 'minify', 'watch']
+    minifiers: minifiers
+    compilers: compilers
 
-for m in globals
+
+# Get a list of files that match an extension
+getFiles = (dir, ext, cb) ->
+    fs.readdir dir, (err, results) ->
+        results = results.filter (f) -> path.extname(f) is ext
+        results = results.map (f) -> path.join dir, f
+        cb results
+
+# Error handler
+failed = (what, file, e) ->
+    console.error "Error #{what}".red.inverse, file.toString()
+    if e.type and e.filename
+        console.error "[L#{e.line}:C#{e.column}]".yellow,
+            "#{e.type} error".yellow
+            "in #{e.filename}:".grey
+            e.message
+    else
+        console.error e.type.yellow, e.message.grey
+
+# Extend all functions that accept a file parameter to:
+#   - accept both arrays and *.xxx paths
+#   - capture errors using domains
+#   - feed the original method a File instance
+['lint', 'compile', 'minify', 'watch'].forEach (method) ->
+
+    # create domain and attach to method
+    dm = domain.create()
+
+    # save original and overwrite method
+    original = flour[method]
+    flour[method] = dm.bind (file, rest...) ->
+
+        dm.on 'error', (err) -> failed "#{method.replace(/e$/,'')}ing", file, err
+
+        if util.isArray file
+            original.apply flour, [new File f].concat(rest) for f in file
+            return
+
+        file = new File file
+
+        if file.base is '*'
+            getFiles file.dir, file.ext, (files) ->
+                flour[method].apply flour, [files].concat(rest)
+            return
+        
+        original.apply flour, [file].concat(rest)
+
+# export globals
+for m in ['lint', 'compile', 'bundle', 'minify', 'watch']
     if global[m]? then global['_'+m] = global[m]
     global[m] = flour[m]
 
