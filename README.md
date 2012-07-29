@@ -7,17 +7,17 @@ Flour
 
 It adds a bunch of functions to global scope:
 
-- `lint(file, [options], [globals])`: check javascript syntax using JSHint 
 - `compile(file, [dest], [cb])`: compile LESS or CoffeeScript files (automatic)
 - `bundle(output, filesArray)`: compile, minify and concat a group of files
-- `minify(file, [dest], [cb])`: minify files using uglify-js
 - `watch(file, fn)`: do something when file changes. Accepts an array of filenames
+- `lint(file, [options], [globals])`: check javascript syntax using JSHint 
+- `minify(file, [dest], [cb])`: minify files using uglify-js
 
 (If that hurts your feelings you can remove them with `flour.noConflict()`. That will bring the global object to it's previous state)
 
 ## Usage
 
-Just `npm install flour`.
+Just `npm install flour`, don't forget to add it to your `package.json`.
 
 This is what a typical Cakefile could look like:
 
@@ -26,17 +26,17 @@ This is what a typical Cakefile could look like:
     task 'lint', 'Check javascript syntax', ->
         lint 'js/feature.js'
 
-    task 'build:plugins', 'Bundle javascript plugins', ->
+    task 'build:plugins', ->
         bundle 'js/plugins.js', [
             'vendor/underscore.js'
             'vendor/hogan.js'
             'vendor/backbone.js'
         ]
 
-    task 'build:coffee', 'Compile CoffeeScript', ->
+    task 'build:coffee', ->
         compile 'coffee/app.coffee', 'js/app.js'
 
-    task 'build:less', 'Compile LESS', ->
+    task 'build:less', ->
         compile 'less/main.less', 'css/main.css'
 
     task 'build', ->
@@ -48,13 +48,25 @@ This is what a typical Cakefile could look like:
         invoke 'build:less'
         invoke 'build:coffee'
 
-        watch [
-            'less/main.less'
-            'less/reset.less'
-            'less/print.less'
-        ], -> invoke 'build:less'
-
+        watch 'less/*.less', -> invoke 'build:less'
         watch 'coffee/app.coffee', -> invoke 'build:coffee'
+
+Each of these function can accept either a single file path or an array of files. Wildcard paths like `*.xxx` are accepted. Example using `watch` with a list of files:
+
+    watch [
+        'less/main.less'
+        'less/reset.less'
+        'less/print.less'
+    ], -> invoke 'build:less'
+
+You can also access the resulting output by passing a callback:
+
+    compile 'coffee/app.coffee', (output) ->
+        # do something with the compiled output
+        mail.send subject: 'Project file', to: 'grandma@hotmail.com', body: output
+
+    # if you don't trust the compiler
+    compile 'coffee/app.coffee', 'js/app.js', -> lint 'js/app.js'
 
 ## Why?
 
