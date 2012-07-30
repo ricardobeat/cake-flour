@@ -25,7 +25,8 @@ passthrough = (file, cb) -> file.read cb
 
 minifiers =
     '.coffee': passthrough
-    '.less': passthrough
+    '.less'  : passthrough
+    '.html'  : passthrough
 
     '.js': (file, cb) ->
         { parser: jsp, uglify: pro } = require 'uglify-js'
@@ -37,8 +38,9 @@ minifiers =
         file.read cb
 
 compilers = 
-    '.js': passthrough
-    '.css': passthrough
+    '.js'  : passthrough
+    '.css' : passthrough
+    '.html': passthrough
 
     '.coffee': (file, cb) ->
         coffee = require 'coffee-script'
@@ -104,7 +106,13 @@ flour =
             console.error "Error watching".red, file.path
         return
 
-    bundle: (dest, files, cb) ->
+    bundle: (files, dest, cb) ->
+
+        if not util.isArray files
+            flour.getFiles files, (results) ->
+                flour.bundle results, dest, cb
+            return
+
         results = []
         counter = 0
 
@@ -132,12 +140,13 @@ flour =
     compilers: compilers
 
 
-# Get a list of files that match an extension
-getFiles = (dir, ext, cb) ->
-    fs.readdir dir, (err, results) ->
-        results = results.filter (f) -> path.extname(f) is ext
-        results = results.map (f) -> path.join dir, f
-        cb results
+    # Get a list of files that match an extension
+    getFiles: (file, cb) ->
+        file = new File file
+        fs.readdir file.dir, (err, results) ->
+            results = results.filter (f) -> path.extname(f) is file.ext
+            results = results.map (f) -> path.join file.dir, f
+            cb results
 
 # Error handler
 failed = (what, file, e) ->
@@ -172,14 +181,14 @@ failed = (what, file, e) ->
         file = new File file
 
         if file.base is '*'
-            getFiles file.dir, file.ext, (files) ->
+            flour.getFiles file, (files) ->
                 flour[method].apply flour, [files].concat(rest)
             return
         
         original.apply flour, [file].concat(rest)
 
 # export globals
-for m in ['lint', 'compile', 'bundle', 'minify', 'watch']
+for m in ['lint', 'compile', 'bundle', 'minify', 'watch', 'getFiles']
     if global[m]? then global['_'+m] = global[m]
     global[m] = flour[m]
 
