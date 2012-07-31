@@ -33,9 +33,8 @@ minifiers =
         file.read (code) ->
             cb pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
 
-    '.css': (file, cb) ->
-        # TBD, LESS already compresses output
-        file.read cb
+    # TBD, LESS already compresses output
+    '.css': passthrough
 
 compilers = 
     '.js'  : passthrough
