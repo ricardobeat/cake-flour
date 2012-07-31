@@ -157,7 +157,7 @@ failed = (what, file, e) ->
             "in #{e.filename}:".grey
             e.message
     else
-        console.error e.type.yellow, e.message.grey
+        console.error e.type?.yellow, e.message?.grey
 
 # Extend all functions that accept a file parameter to:
 #   - accept both arrays and *.xxx paths
