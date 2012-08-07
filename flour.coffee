@@ -26,6 +26,7 @@ passthrough = (file, cb) -> file.read cb
 minifiers =
     '.coffee': passthrough
     '.less'  : passthrough
+    '.styl'  : passthrough
     '.html'  : passthrough
 
     '.js': (file, cb) ->
@@ -36,7 +37,7 @@ minifiers =
     # TBD, LESS already compresses output
     '.css': passthrough
 
-compilers = 
+compilers =
     '.js'  : passthrough
     '.css' : passthrough
     '.html': passthrough
@@ -53,6 +54,15 @@ compilers =
             parser.parse code, (err, tree) ->
                 throw err if err
                 cb tree.toCSS(compress: true)
+
+    '.styl': (file, cb) ->
+        stylus = require 'stylus'
+        file.read (code) ->
+            stylus(code)
+            .set('compress', yes)
+            .render (err, css) ->
+                throw err if err
+                cb css
 
 linters =
 
@@ -78,7 +88,7 @@ flour =
             if passed
                 console.log "OK".green.inverse, file.path
                 return
-        
+
             for e in errors
                 pos = "[L#{e.line}:C#{e.character}]"
                 console.log pos.red, e.reason.grey
@@ -183,7 +193,7 @@ failed = (what, file, e) ->
             flour.getFiles file, (files) ->
                 flour[method].apply flour, [files].concat(rest)
             return
-        
+
         original.apply flour, [file].concat(rest)
 
 # export globals
