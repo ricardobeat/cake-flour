@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "less": "",
+    "stylus": "",
     "coffee-script": "",
     "colors": "",
     "uglify-js": "",
