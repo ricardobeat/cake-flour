@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/ricardobeat/cake-flour.png)](http://travis-ci.org/ricardobeat/cake-flour)
 Flour
 ==========
 
