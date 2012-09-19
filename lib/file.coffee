@@ -14,9 +14,9 @@ class File
     constructor: (file, @buffer) ->
         return file if file instanceof File
         @path = file
-        @ext  = path.extname file.replace /^\./, ''
+        @ext  = path.extname(file).replace /^\./, ''
         @name = path.basename file
-        @base = path.basename file, @ext
+        @base = path.basename file, '.'+@ext
         @dir  = path.dirname file
 
         @lastChange = 0
