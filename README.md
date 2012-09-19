@@ -3,11 +3,29 @@ Flour
 
 **Flour** is a set of simple build tools for your Cakefiles.
 
+##### Changelog
+
+#### v0.3
+- flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's `package.json`
+
 ![image](http://i.imgur.com/yIxF9.jpg)
 
 ## Usage
 
-`npm install flour`, don't forget to add it to your `package.json`. Do `require 'flour'` at the top of your Cakefile, the tools are added to global scope.
+Add `flour` and your required pre-processors/compilers to your `package.json`:
+
+    {
+      "name": "dancingrobot",
+      ...
+      "dependencies": {
+        "flour": "",
+        "uglify-js": "",
+        "coffee-script": ""
+      },
+      ...
+    }
+
+Then run `npm install`, and `require 'flour'` at the top of your Cakefile. A few methods are available in the global scope.
 
 This is what a typical Cakefile could look like:
 
@@ -60,11 +78,31 @@ You can also access the resulting output by passing a callback:
     # if you don't trust the CS compiler
     compile 'coffee/app.coffee', 'js/app.js', -> lint 'js/app.js'
 
+## Adapters
+
+These are the current adapters and the required modules:
+
+### Compilers
+
+* CoffeeScript: `coffee-script`
+* LESS: `less`
+* Stylus: `stylus`
+
+### Minifiers
+
+* Javascript: `uglify-js`
+
+### Linters
+
+* Javascript: 'jshint'
+
+Creating new adapters is very easy, take a look at the `adapters/` folder for guidance.
+
 ## Reference
 
 ### Compile
 
-Compiles LESS and CoffeeScript files:
+Compiles CoffeeScript, LESS or Stylus files:
 
     compile(file, [destination], [callback])
 
@@ -80,18 +118,20 @@ Compiles LESS and CoffeeScript files:
 
 ### Bundle
 
-Compile, minify and join a set of files (preserving order):
+Compile, minify and join a set of files:
 
     bundle(files, destination)
 
 ##### Usage
 
+    // preservers the list order
     bundle [
         'lib/jquery.js'
         'lib/underscore.js'
         'lib/backbone.js'
     ], 'js/bundle.js'
 
+    // system-dependent order
     bundle 'js/*.js', 'js/all.js'
 
 ### Watch
@@ -118,8 +158,9 @@ Watch files for changes:
         ], ->
             invoke 'build'
 
-    # or
-    watch '*.coffee', -> invoke 'build'
+    # or simply
+    task 'watch', ->
+        watch '*.coffee', -> invoke 'build'
 
 ### Lint
 
@@ -152,20 +193,20 @@ You can add new minifiers and compilers to `flour`:
         file.read (code) ->
             cb odd.compile code
 
-## Tricks
+## Tips
 
-#### Disable the JS minifier for development
+#### Disable the JS minifier during development
 
     task 'watch', ->
-        # pass code through unchanged
+        # pass code through unchanged so you can
+        # see useful line numbers when debugging
         flour.minifiers['.js'] = (file, cb) -> cb file.buffer
 
-        # see useful line numbers when debugging!
         watch 'scripts/*.coffee', -> invoke 'build'
 
 #### Pre-compile Hogan templates
 
-    flour.compilers['.mustache'] = (file, cb) ->
+    flour.compilers['mustache'] = (file, cb) ->
         hogan = require 'hogan.js'
         file.read (code) ->
             cb "App.templates['#{file.base}']=${hogan.compile code, asString: true};"
@@ -173,9 +214,11 @@ You can add new minifiers and compilers to `flour`:
     task 'build:templates', ->
         bundle 'views/*.mustache', 'resources/views.js'
 
-## Why?
+## Why use flour?
 
-While Grunt, brewerjs, H5BP-build-script and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex. The goal of Flour is to provide a small, short and sane API for the most common build tasks without requiring you to adjust your project structure, install extra tools or create long configuration files. Cake is all you need!
+While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex to setup.
+
+The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.
 
 #### TODO:
 - tests

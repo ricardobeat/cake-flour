@@ -4,116 +4,29 @@ util   = require 'util'
 domain = require 'domain'
 colors = require 'colors'
 
-# File abstraction to avoid repeat I/O
-class File
-    constructor: (file, @buffer) ->
-        return file if file instanceof File
-        @path = file
-        @ext  = path.extname file
-        @name = path.basename file
-        @base = path.basename file, @ext
-        @dir  = path.dirname file
-    read: (cb) ->
-        return cb @buffer if @buffer?
-        fs.readFile @path, (err, data) ->
-            throw err if err
-            cb @buffer = data.toString()
-    toString: ->
-        @path
+File = require './lib/file'
 
-passthrough = (file, cb) -> file.read cb
+#### Flour object
 
-minifiers =
-    '.coffee': passthrough
-    '.less'  : passthrough
-    '.styl'  : passthrough
-    '.html'  : passthrough
-
-    '.js': (file, cb) ->
-        { parser: jsp, uglify: pro } = require 'uglify-js'
-        file.read (code) ->
-            cb pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
-
-    # TBD, LESS already compresses output
-    '.css': passthrough
-
-compilers =
-    '.js'  : passthrough
-    '.css' : passthrough
-    '.html': passthrough
-
-    '.coffee': (file, cb) ->
-        coffee = require 'coffee-script'
-        file.read (code) ->
-            cb coffee.compile code
-
-    '.less': (file, cb) ->
-        less = require 'less'
-        parser = new less.Parser { paths: [file.dir] }
-        file.read (code) ->
-            parser.parse code, (err, tree) ->
-                throw err if err
-                cb tree.toCSS(compress: true)
-
-    '.styl': (file, cb) ->
-        stylus = require 'stylus'
-        file.read (code) ->
-            stylus(code)
-            .set('compress', yes)
-            .render (err, css) ->
-                throw err if err
-                cb css
-
-linters =
-
-    '.js': (file, args, cb) ->
-        # accepts options: flour.lint 'file.js', [options], [globals]
-        jshint = (require 'jshint').JSHINT
-        file.read (code) ->
-            passed = jshint.apply jshint, [code].concat(args)
-            cb passed, jshint.errors
-
-# Success handler. Writes to file if an output path was
-# provided, otherwise it just returns the result
-finishAction = (action, file, output, dest, cb) ->
-    console.log action.magenta, file.toString(), '@', new Date().toLocaleTimeString()
-    if not dest? then return cb output
-    fs.writeFile dest, output, (err) -> cb? output
-
-# Main object
 flour =
 
+    compile: (file, dest, cb) ->
+        file.compile (output) ->
+            success dest, @, output, 'Compiled', cb
+
+    minify: (file, dest, cb) ->
+        file.minify (output) ->
+            success dest, @, output, 'Minified', cb
+
     lint: (file, args...) ->
-        linters[file.ext] file, args, (passed, errors) ->
+        file.lint args, (passed, errors) ->
             if passed
                 console.log "OK".green.inverse, file.path
                 return
-
             for e in errors
                 pos = "[L#{e.line}:C#{e.character}]"
                 console.log pos.red, e.reason.grey
                 console.log "NOT OK".magenta.inverse, file.path.bold
-
-    compile: (file, dest, cb) ->
-        compilers[file.ext] file, (output) ->
-            finishAction 'Compiled', file, output, dest, cb
-
-    minify: (file, dest, cb) ->
-        minifiers[file.ext] file, (output) ->
-            finishAction 'Minified', file, output, dest, cb
-
-    watch: (file, fn) ->
-        lastChange = 0
-        try
-            fs.watch file.path, (event, filename) ->
-                return if event isnt 'change'
-                # ignore repeated event misfires
-                fn file if Date.now() - lastChange > 1000
-                lastChange = Date.now()
-            console.log "Watching".green, file.path
-        catch e
-            console.error "Error watching".red, file.path
-        return
 
     bundle: (files, dest, cb) ->
 
@@ -128,16 +41,19 @@ flour =
         done = ->
             return unless files.length is ++counter
             shim = new File dest, results.join("\n")
-            minifiers[shim.ext] shim, (output) ->
-                finishAction 'Packaged', shim, output, dest, cb
+            shim.minify (output) ->
+                success dest, @, output, 'Packaged', cb
 
         files.forEach (file, i) ->
             file = new File file
-            compilers[file.ext] file, (code) ->
-                results[i] = code
+            file.compile (output) ->
+                results[i] = output
                 done()
 
         return
+
+    watch: (file, fn) ->
+        file.watch fn
 
     noConflict: ->
         for m in globals
@@ -145,21 +61,49 @@ flour =
             if global['_'+m]? then global[m] = global['_'+m]
         return
 
-    minifiers: minifiers
-    compilers: compilers
+    # Get a list of files from a wildcard path (*.ext)
+    getFiles: (filepath, cb) ->
+        ext = path.extname filepath
+        dir = path.dirname filepath
 
-
-    # Get a list of files that match an extension
-    getFiles: (file, cb) ->
-        file = new File file
-        fs.readdir file.dir, (err, results) ->
-            results = results.filter (f) -> path.extname(f) is file.ext
-            results = results.map (f) -> path.join file.dir, f
+        fs.readdir dir, (err, results) ->
+            results = results.filter (f) -> path.extname(f) is ext
+            results = results.map (f) -> path.join dir, f
             cb results
+
+    # Get file(s)' contents
+    get: (filepath, cb) ->
+        file = new File filepath
+
+        if file.base is '*'
+            getFiles filepath, (files) ->
+                results = []
+                count = files.length
+                files.forEach (f, i) ->
+                    new File(f).read (output) ->
+                        results[i] = output
+                        if --count is 0 then cb results
+        else
+            file.read cb
+
+    # Load adapters
+    minifiers : require './adapters/minifiers'
+    compilers : require './adapters/compilers'
+    linters   : require './adapters/linters'
+
+# Success handler. Writes to file if an output path was
+# provided, otherwise it just returns the result
+success = (dest, file, output, action, cb) ->
+    if dest?
+        fs.writeFile dest, output, (err) -> cb? output
+    else
+        cb output
+
+    console.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
 
 # Error handler
 failed = (what, file, e) ->
-    console.error "Error #{what}".red.inverse, file.toString()
+    console.error "Error #{what}".red.inverse, file?.toString()
     if e.type and e.filename
         console.error "[L#{e.line}:C#{e.column}]".yellow,
             "#{e.type} error".yellow
@@ -168,36 +112,43 @@ failed = (what, file, e) ->
     else
         console.error e.type?.yellow, e.message?.grey
 
-# Extend all functions that accept a file parameter to:
+# Overwrite all methods that accept a file parameter to:
 #   - accept both arrays and *.xxx paths
 #   - capture errors using domains
 #   - feed the original method a File instance
 ['lint', 'compile', 'minify', 'watch'].forEach (method) ->
 
-    # create domain and attach to method
     dm = domain.create()
 
-    # save original and overwrite method
     original = flour[method]
+
     flour[method] = dm.bind (file, rest...) ->
 
-        dm.on 'error', (err) -> failed "#{method.replace(/e$/,'')}ing", file, err
+        dm.on 'error', (err) ->
+            failed "#{method.replace(/e$/,'')}ing", file, err
 
         if util.isArray file
             original.apply flour, [new File f].concat(rest) for f in file
             return
 
+        # Create a File object with the given path. If it turns out
+        # to be a wildcard path, we just discard it.
         file = new File file
 
+        # Handle wildcard paths.
         if file.base is '*'
-            flour.getFiles file, (files) ->
+            flour.getFiles file.path, (files) ->
                 flour[method].apply flour, [files].concat(rest)
             return
 
+        # Or call original method if it's a single file.
         original.apply flour, [file].concat(rest)
 
-# export globals
-for m in ['lint', 'compile', 'bundle', 'minify', 'watch', 'getFiles']
+#### Globals
+
+globals = ['lint', 'compile', 'bundle', 'minify', 'watch', 'get']
+
+for m in globals
     if global[m]? then global['_'+m] = global[m]
     global[m] = flour[m]
 
