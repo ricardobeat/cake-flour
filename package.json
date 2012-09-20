@@ -1,7 +1,7 @@
 {
   "name": "flour",
   "version": "0.3.2",
-  "description": "Easy build tools for your front-end Cakefile",
+  "description": "Cakefile extension for simpler build scripts",
   "main": "flour.coffee",
   "scripts": {
     "test": ""
