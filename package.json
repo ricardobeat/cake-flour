@@ -7,7 +7,8 @@
     "test": ""
   },
   "dependencies": {
-    "colors": ""
+    "colors": "",
+    "hound": ""
   },
   "repository": {
     "type": "git",

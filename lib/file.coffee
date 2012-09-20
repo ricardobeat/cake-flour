@@ -1,5 +1,6 @@
-fs   = require 'fs'
-path = require 'path'
+fs    = require 'fs'
+path  = require 'path'
+hound = require('hound')
 
 # File abstraction to simplify I/O, with caching.
 
@@ -37,16 +38,15 @@ class File
         (linters[@ext] ? passthrough) @, args, cb.bind(@)
 
     watch: (fn) ->
+        fn = fn.bind @
         try
-            fs.watch @path, (event, filename) ->
-                return if event isnt 'change'
-                # ignore repeated event misfires
-                fn.call @, @ if Date.now() - @lastChange > 1000
-                @lastChange = Date.now()
+            @watcher = hound.watch @path
+            for evt in ['create', 'change', 'delete']
+                @watcher.on evt, fn
             console.log "Watching".green, @path
         catch e
             console.error "Error watching".red, @path, e
-        return
+        return @watcher
 
     toString: ->
         @path
