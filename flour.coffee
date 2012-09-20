@@ -118,17 +118,16 @@ failed = (what, file, e) ->
 #   - feed the original method a File instance
 ['lint', 'compile', 'minify', 'watch'].forEach (method) ->
 
-    dm = domain.create()
-
     original = flour[method]
 
-    flour[method] = dm.bind (file, rest...) ->
+    flour[method] = (file, rest...) ->
 
+        dm = domain.create()
         dm.on 'error', (err) ->
             failed "#{method.replace(/e$/,'')}ing", file, err
 
         if util.isArray file
-            original.apply flour, [new File f].concat(rest) for f in file
+            dm.bind(original).apply flour, [new File f].concat(rest) for f in file
             return
 
         # Create a File object with the given path. If it turns out
@@ -142,7 +141,7 @@ failed = (what, file, e) ->
             return
 
         # Or call original method if it's a single file.
-        original.apply flour, [file].concat(rest)
+        dm.bind(original).apply flour, [file].concat(rest)
 
 #### Globals
 
