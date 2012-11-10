@@ -191,11 +191,11 @@ Minify files (currently only Javascript using [UglifyJS](https://github.com/mish
 
 You can add new minifiers and compilers to `flour`:
 
-    flour.minifiers['.stupid'] = (file, cb) ->
+    flour.minifiers['dumb'] = (file, cb) ->
         file.read (code) ->
             cb code.replace(/\s*/, '')
 
-    flour.compilers['.odd'] = (file, cb) ->
+    flour.compilers['odd'] = (file, cb) ->
         odd = require 'odd-lib'
         file.read (code) ->
             cb odd.compile code
@@ -205,9 +205,7 @@ You can add new minifiers and compilers to `flour`:
 #### Disable the JS minifier during development
 
     task 'watch', ->
-        # pass code through unchanged so you can
-        # see useful line numbers when debugging
-        flour.minifiers['.js'] = (file, cb) -> cb file.buffer
+        flour.minifiers['js'] = null
 
         watch 'scripts/*.coffee', -> invoke 'build'
 
