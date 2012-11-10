@@ -6,7 +6,7 @@ colors = require 'colors'
 
 File = require './lib/file'
 
-#### Flour object
+# Main object / API
 
 flour =
 
@@ -143,7 +143,7 @@ failed = (what, file, e) ->
         # Or call original method if it's a single file.
         dm.bind(original).apply flour, [file].concat(rest)
 
-#### Globals
+# Global methods
 
 globals = ['lint', 'compile', 'bundle', 'minify', 'watch', 'get']
 
