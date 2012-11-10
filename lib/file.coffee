@@ -1,6 +1,6 @@
 fs    = require 'fs'
 path  = require 'path'
-hound = require('hound')
+hound = require 'hound'
 
 # File abstraction to simplify I/O, with caching.
 
