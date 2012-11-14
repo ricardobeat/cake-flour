@@ -1,4 +1,4 @@
 cp = require 'child_process'
 
 task 'test', ->
-    cp.spawn 'mocha', [], stdio: 'inherit'
+    cp.spawn 'node_modules/.bin/mocha', [], stdio: 'inherit'
