@@ -26,7 +26,7 @@ class File
 
     read: (cb) ->
         return cb @buffer if @buffer?
-        fs.readFile @path, (err, data) ->
+        fs.readFile @path, (err, data) =>
             throw err if err
             cb @buffer = data.toString()
 
