@@ -15,11 +15,17 @@ module.exports =
 
     styl: (file, cb) ->
         stylus = require 'stylus'
+        try nib = require 'nib'
+
         file.read (code) ->
             opts =
                 filename: file.name
                 paths: [file.dir]
                 compress: true
-            stylus.render code, opts, (err, css) ->
+
+            renderer = stylus code, opts
+            renderer.use nib() if nib
+
+            renderer.render (err, css) ->
                 throw err if err
                 cb css
