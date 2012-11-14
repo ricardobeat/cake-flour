@@ -99,3 +99,19 @@ describe 'Stylus compiler', ->
         flour.compile input_file, (output) ->
             output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
+
+describe 'JS minifier', ->
+
+    input_file  = 'test/sources/minify.js'
+    output_file = 'test/temp/minify.min.js'
+
+    it 'should minify javascript and return the output', (done) ->
+        flour.minify input_file, (output) ->
+            output.should.include 'function test(){return'
+            done()
+
+    it 'should minify javascript to a file', (done) ->
+        flour.minify input_file, output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'function test(){return'
+            done()
