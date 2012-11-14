@@ -99,29 +99,3 @@ describe 'Stylus compiler', ->
         flour.compile input_file, (output) ->
             output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
-
-describe 'JS minifier', ->
-
-    input_file  = 'test/sources/compile.styl'
-    output_file = 'test/temp/compile.css'
-
-    it 'should compile Stylus and return the output', (done) ->
-        flour.compile input_file, (output) ->
-            output.should.include '.one .two'
-            done()
-
-    it 'should compile Stylus to a file', (done) ->
-        flour.compile input_file, output_file, (res) ->
-            res.should.include '.one .two'
-            done()
-
-    it 'should compile Stylus to a file && return the output', (done) ->
-        flour.compile input_file, output_file, (res) ->
-            res.should.include '.one .two'
-            done()
-
-    it 'should compile Stylus with compression disabled', (done) ->
-        flour.compilers.styl.compress = false
-        flour.compile input_file, (output) ->
-            output.should.include '.one .two {\n  color: #abcdef;\n}'
-            done()
