@@ -31,13 +31,16 @@ class File
             cb @buffer = data.toString()
 
     compile: (cb) ->
-        (compilers[@ext] ? passthrough) @, cb.bind(@)
+        compiler = compilers[@ext] ? passthrough
+        compiler.call compiler, @, cb.bind(@)
 
     minify: (cb) ->
-        (minifiers[@ext] ? passthrough) @, cb.bind(@)
+        minifier = minifiers[@ext] ? passthrough
+        minifier.call minifier, @, cb.bind(@)
 
     lint: (args, cb) ->
-        (linters[@ext] ? passthrough) @, args, cb.bind(@)
+        linter = linters[@ext] ? passthrough
+        linter.call linter, @, cb.bind(@)
 
     watch: (fn) ->
         fn = fn.bind @
