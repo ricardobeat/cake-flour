@@ -32,18 +32,60 @@
 
 <p><strong>Flour</strong> is a set of simple build tools for your Cakefiles.</p>
 
-<p><img src="http://i.imgur.com/yIxF9.jpg" alt="image"></p>
+<h4>Changelog</h4>
+
+<h5>v0.4.0</h5>
+
+<ul>
+<li>tests!</li>
+<li>fix file buffer bug</li>
+<li>accept options for adapters, enables disabling compression for LESS and Stylus</li>
+</ul><h5>v0.3.3</h5>
+
+<ul>
+<li>bugfixes</li>
+</ul><h5>v0.3.2</h5>
+
+<ul>
+<li>add <a href="http://github.com/beefsack/node-hound">node-hound</a> as a dependency for file watching</li>
+<li>watch whole directory trees: <code>watch</code>src/`, -&gt; invoke 'build' (listens for new files and deletes too)</li>
+<li>fix error handlers leak</li>
+</ul><h5>v0.3.1</h5>
+
+<ul>
+<li>fix extension handling bug
+##### v0.3.0</li>
+<li>flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's <code>package.json</code>
+</li>
+</ul><p><img src="http://i.imgur.com/yIxF9.jpg" alt="image"></p>
 
 <h2>Usage</h2>
 
-<p><code>npm install flour</code>, don't forget to add it to your <code>package.json</code>. Do <code>require 'flour'</code> at the top of your Cakefile, the tools are added to global scope.</p>
+<p>Add <code>flour</code> and your required pre-processors/compilers to your <code>package.json</code>:</p>
+
+<pre><code>{
+  "name": "dancingrobot",
+  ...
+  "dependencies": {
+    "flour": "",
+    "uglify-js": "",
+    "coffee-script": ""
+  },
+  ...
+}
+</code></pre>
+
+<p>Then run <code>npm install</code>, and <code>require 'flour'</code> at the top of your Cakefile. A few methods are available in the global scope.</p>
 
 <p>This is what a typical Cakefile could look like:</p>
 
 <pre><code>require 'flour'
 
-task 'lint', 'Check javascript syntax', -&gt;
-    lint 'js/feature.js'
+task 'build:coffee', -&gt;
+    compile 'coffee/app.coffee', 'js/app.js'
+
+task 'build:less', -&gt;
+    compile 'less/main.less', 'css/main.css'
 
 task 'build:plugins', -&gt;
     bundle [
@@ -51,12 +93,6 @@ task 'build:plugins', -&gt;
         'vendor/hogan.js'
         'vendor/backbone.js'
     ], 'js/plugins.js'
-
-task 'build:coffee', -&gt;
-    compile 'coffee/app.coffee', 'js/app.js'
-
-task 'build:less', -&gt;
-    compile 'less/main.less', 'css/main.css'
 
 task 'build', -&gt;
     invoke 'build:plugins'
@@ -69,11 +105,14 @@ task 'watch', -&gt;
 
     watch 'less/*.less', -&gt; invoke 'build:less'
     watch 'coffee/app.coffee', -&gt; invoke 'build:coffee'
+
+task 'lint', 'Check javascript syntax', -&gt;
+    lint 'js/feature.js'
 </code></pre>
 
 <p>(if the global pollution hurts your feelings you can remove them with <code>flour.noConflict()</code>. That will bring the global object back to it's previous state)</p>
 
-<p>Each of these functions can accept either a single file path or an array of files. Simple wildcard paths like <code>*.xxx</code> are also accepted. Example using <code>watch</code> with a list of files:</p>
+<p>Each of these functions accepts either a file path or a list of files. Simple wildcard paths (<code>*.xxx</code>) are allowed. For example:</p>
 
 <pre><code>watch [
     'less/main.less'
@@ -88,15 +127,39 @@ task 'watch', -&gt;
     # do something with the compiled output
     mail.send subject: 'Project file', to: 'grandma@hotmail.com', body: output
 
-# if you don't trust the CS compiler
+# verify the CoffeeScript compiler output
 compile 'coffee/app.coffee', 'js/app.js', -&gt; lint 'js/app.js'
 </code></pre>
+
+<h2>Adapters</h2>
+
+<p>These are the current adapters and the required modules:</p>
+
+<h3>Compilers</h3>
+
+<ul>
+<li>CoffeeScript: <code>coffee-script</code>
+</li>
+<li>LESS: <code>less</code>
+</li>
+<li>Stylus: <code>stylus</code>
+</li>
+</ul><h3>Minifiers</h3>
+
+<ul>
+<li>Javascript: <code>uglify-js</code>
+</li>
+</ul><h3>Linters</h3>
+
+<ul>
+<li>Javascript: 'jshint'</li>
+</ul><p>Creating new adapters is very easy, take a look at the <code>adapters/</code> folder for guidance.</p>
 
 <h2>Reference</h2>
 
 <h3>Compile</h3>
 
-<p>Compiles LESS and CoffeeScript files:</p>
+<p>Compiles CoffeeScript, LESS or Stylus files:</p>
 
 <pre><code>compile(file, [destination], [callback])
 </code></pre>
@@ -112,21 +175,29 @@ compile 'cold.coffee', (output) -&gt;
     console.log output.transform()
 </code></pre>
 
+<p>You can disable compression for LESS or Stylus with</p>
+
+<pre><code>flour.compilers.less.compress = false
+flour.compilers.styl.compress = false
+</code></pre>
+
 <h3>Bundle</h3>
 
-<p>Compile, minify and join a set of files (preserving order):</p>
+<p>Compile, minify and join a set of files:</p>
 
 <pre><code>bundle(files, destination)
 </code></pre>
 
 <h5>Usage</h5>
 
-<pre><code>bundle [
+<pre><code>// preservers the list order
+bundle [
     'lib/jquery.js'
     'lib/underscore.js'
     'lib/backbone.js'
 ], 'js/bundle.js'
 
+// system-dependent order
 bundle 'js/*.js', 'js/all.js'
 </code></pre>
 
@@ -155,8 +226,9 @@ task 'watch', -&gt;
     ], -&gt;
         invoke 'build'
 
-# or
-watch '*.coffee', -&gt; invoke 'build'
+# or simply
+task 'watch', -&gt;
+    watch '*.coffee', -&gt; invoke 'build'
 </code></pre>
 
 <h3>Lint</h3>
@@ -184,31 +256,29 @@ watch '*.coffee', -&gt; invoke 'build'
 
 <p>You can add new minifiers and compilers to <code>flour</code>:</p>
 
-<pre><code>flour.minifiers['.stupid'] = (file, cb) -&gt;
+<pre><code>flour.minifiers['dumb'] = (file, cb) -&gt;
     file.read (code) -&gt;
         cb code.replace(/\s*/, '')
 
-flour.compilers['.odd'] = (file, cb) -&gt;
+flour.compilers['odd'] = (file, cb) -&gt;
     odd = require 'odd-lib'
     file.read (code) -&gt;
         cb odd.compile code
 </code></pre>
 
-<h2>Tricks</h2>
+<h2>Tips</h2>
 
-<h4>Disable the JS minifier for development</h4>
+<h4>Disable the JS minifier during development</h4>
 
 <pre><code>task 'watch', -&gt;
-    # pass code through unchanged
-    flour.minifiers['.js'] = (file, cb) -&gt; cb file.buffer
+    flour.minifiers['js'] = null
 
-    # see useful line numbers when debugging!
     watch 'scripts/*.coffee', -&gt; invoke 'build'
 </code></pre>
 
 <h4>Pre-compile Hogan templates</h4>
 
-<pre><code>flour.compilers['.mustache'] = (file, cb) -&gt;
+<pre><code>flour.compilers['mustache'] = (file, cb) -&gt;
     hogan = require 'hogan.js'
     file.read (code) -&gt;
         cb "App.templates['#{file.base}']=${hogan.compile code, asString: true};"
@@ -217,16 +287,11 @@ task 'build:templates', -&gt;
     bundle 'views/*.mustache', 'resources/views.js'
 </code></pre>
 
-<h2>Why?</h2>
+<h2>Why use flour?</h2>
 
-<p>While Grunt, brewerjs, H5BP-build-script and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex. The goal of Flour is to provide a small, short and sane API for the most common build tasks without requiring you to adjust your project structure, install extra tools or create long configuration files. Cake is all you need!</p>
+<p>While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex to setup.</p>
 
-<h4>TODO:</h4>
-
-<ul>
-<li>tests</li>
-<li>figure out how to magically bundle hogan templates</li>
-</ul>
+<p>The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.</p>
       </section>
       <footer>
         <p>This project is maintained by <a href="https://github.com/ricardobeat">ricardobeat</a></p>
