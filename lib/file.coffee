@@ -2,7 +2,7 @@ fs    = require 'fs'
 path  = require 'path'
 hound = require 'hound'
 
-logger = require './lib/logger'
+logger = require './logger'
 
 # File abstraction to simplify I/O, with caching.
 
