@@ -3,25 +3,7 @@ Flour
 
 **Flour** is a set of simple build tools for your Cakefiles.
 
-#### Changelog
-
-##### v0.4.0
-- tests!
-- fix file buffer bug
-- accept options for adapters, enables disabling compression for LESS and Stylus
-
-##### v0.3.3
-- bugfixes
-
-##### v0.3.2
-- add [node-hound](http://github.com/beefsack/node-hound) as a dependency for file watching
-- watch whole directory trees: `watch `src/`, -> invoke 'build' (listens for new files and deletes too)
-- fix error handlers leak
-
-##### v0.3.1
-- fix extension handling bug
-##### v0.3.0
-- flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's `package.json`
+[Changelog](#changelog)
 
 ![image](http://i.imgur.com/yIxF9.jpg)
 
@@ -237,3 +219,25 @@ You can add new minifiers and compilers to `flour`:
 While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex to setup.
 
 The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.
+
+<a id="changelog"></a>
+#### Changelog
+
+##### v0.4.0
+- tests!
+- fix file buffer bug
+- accept options for adapters, enables disabling compression for LESS and Stylus
+
+##### v0.3.3
+- bugfixes
+
+##### v0.3.2
+- add [node-hound](http://github.com/beefsack/node-hound) as a dependency for file watching
+- watch whole directory trees: `watch `src/`, -> invoke 'build' (listens for new files and deletes too)
+- fix error handlers leak
+
+##### v0.3.1
+- fix extension handling bug
+
+##### v0.3.0
+- flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's `package.json`
