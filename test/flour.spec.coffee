@@ -25,6 +25,7 @@ describe 'Flour', ->
     it 'should expose a watch method', ->
         flour.bundle.should.be.a('function')
 
+
 describe 'CoffeeScript compiler', ->
 
     input_file  = 'test/sources/compile.coffee'
@@ -47,6 +48,7 @@ describe 'CoffeeScript compiler', ->
             should.exist fs.existsSync output_file
             res.should.include 'bacon = function'
             done()
+
 
 describe 'LESS compiler', ->
 
@@ -74,6 +76,7 @@ describe 'LESS compiler', ->
             output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
 
+
 describe 'Stylus compiler', ->
 
     input_file  = 'test/sources/compile.styl'
@@ -99,6 +102,7 @@ describe 'Stylus compiler', ->
         flour.compile input_file, (output) ->
             output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
+
 
 describe 'JS minifier', ->
 
