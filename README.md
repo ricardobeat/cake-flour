@@ -38,8 +38,11 @@ This is what a typical Cakefile could look like:
 
     require 'flour'
 
-    task 'lint', 'Check javascript syntax', ->
-        lint 'js/feature.js'
+    task 'build:coffee', ->
+        compile 'coffee/app.coffee', 'js/app.js'
+
+    task 'build:less', ->
+        compile 'less/main.less', 'css/main.css'
 
     task 'build:plugins', ->
         bundle [
@@ -47,12 +50,6 @@ This is what a typical Cakefile could look like:
             'vendor/hogan.js'
             'vendor/backbone.js'
         ], 'js/plugins.js'
-
-    task 'build:coffee', ->
-        compile 'coffee/app.coffee', 'js/app.js'
-
-    task 'build:less', ->
-        compile 'less/main.less', 'css/main.css'
 
     task 'build', ->
         invoke 'build:plugins'
@@ -66,9 +63,12 @@ This is what a typical Cakefile could look like:
         watch 'less/*.less', -> invoke 'build:less'
         watch 'coffee/app.coffee', -> invoke 'build:coffee'
 
+    task 'lint', 'Check javascript syntax', ->
+        lint 'js/feature.js'
+
 (if the global pollution hurts your feelings you can remove them with `flour.noConflict()`. That will bring the global object back to it's previous state)
 
-Each of these functions can accept either a single file path or an array of files. Simple wildcard paths like `*.xxx` are also accepted. Example using `watch` with a list of files:
+Each of these functions accepts either a file path or a list of files. Simple wildcard paths (`*.xxx`) are allowed. For example:
 
     watch [
         'less/main.less'
@@ -82,7 +82,7 @@ You can also access the resulting output by passing a callback:
         # do something with the compiled output
         mail.send subject: 'Project file', to: 'grandma@hotmail.com', body: output
 
-    # if you don't trust the CS compiler
+    # verify the CoffeeScript compiler output
     compile 'coffee/app.coffee', 'js/app.js', -> lint 'js/app.js'
 
 ## Adapters
@@ -122,6 +122,11 @@ Compiles CoffeeScript, LESS or Stylus files:
 
     compile 'cold.coffee', (output) ->
         console.log output.transform()
+
+You can disable compression for LESS or Stylus with
+
+    flour.compilers.less.compress = false
+    flour.compilers.styl.compress = false
 
 ### Bundle
 
