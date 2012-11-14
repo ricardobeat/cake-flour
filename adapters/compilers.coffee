@@ -24,7 +24,7 @@ module.exports =
                 compress: true
 
             renderer = stylus code, opts
-            renderer.use nib() if nib
+            renderer.use nib() if nib?
 
             renderer.render (err, css) ->
                 throw err if err
