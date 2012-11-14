@@ -220,8 +220,7 @@ While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have
 
 The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.
 
-<a id="changelog"></a>
-#### Changelog
+#### Changelog <a name="changelog"></a>
 
 ##### v0.4.0
 - tests!
