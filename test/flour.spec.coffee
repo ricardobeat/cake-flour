@@ -25,24 +25,77 @@ describe 'Flour', ->
     it 'should expose a watch method', ->
         flour.bundle.should.be.a('function')
 
-describe 'Compiler', ->
+describe 'CoffeeScript compiler', ->
+
+    input_file  = 'test/sources/test.coffee'
+    output_file = 'test/temp/test.js'
 
     it 'should compile CoffeeScript and return the output', (done) ->
-        flour.compile 'test/sources/test.coffee', (output) ->
+        flour.compile input_file, (output) ->
             output.should.include 'bacon = function'
             done()
 
     it 'should compile CoffeeScript to a file', (done) ->
-        input  = 'test/sources/test.coffee'
-        output = 'test/temp/test.js'
-        flour.compile input, output
-        contents = fs.readFileSync(output).toString()
+        
+        flour.compile input_file, output_file
+        contents = fs.readFileSync(output_file).toString()
         contents.should.include 'bacon = function'
         done()
 
     it 'should compile CoffeeScript to a file && return the output', (done) ->
-        input  = 'test/sources/test.coffee'
-        output = 'test/temp/test.js'
-        flour.compile input, output, (res) ->
+        flour.compile input_file, output_file, (res) ->
+            should.exist fs.existsSync output_file
             res.should.include 'bacon = function'
+            done()
+
+describe 'LESS compiler', ->
+
+    input_file  = 'test/sources/test.less'
+    output_file = 'test/temp/test.css'
+
+    it 'should compile LESS and return the output', (done) ->
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two'
+            done()
+
+    it 'should compile LESS to a file', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile LESS to a file && return the output', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile LESS with compression disabled', (done) ->
+        flour.compilers.less.compress = false
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two {\n  color: #abcdef;\n}'
+            done()
+
+describe 'Stylus compiler', ->
+
+    input_file  = 'test/sources/test.styl'
+    output_file = 'test/temp/test.css'
+
+    it 'should compile Stylus and return the output', (done) ->
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus to a file', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus to a file && return the output', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus with compression disabled', (done) ->
+        flour.compilers.styl.compress = false
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
