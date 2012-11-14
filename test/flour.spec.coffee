@@ -37,7 +37,6 @@ describe 'CoffeeScript compiler', ->
             done()
 
     it 'should compile CoffeeScript to a file', (done) ->
-        
         flour.compile input_file, output_file
         contents = fs.readFileSync(output_file).toString()
         contents.should.include 'bacon = function'
@@ -61,12 +60,15 @@ describe 'LESS compiler', ->
             done()
 
     it 'should compile LESS to a file', (done) ->
-        flour.compile input_file, output_file, (res) ->
-            res.should.include '.one .two'
+        flour.compile input_file, output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include '.one .two'
             done()
 
     it 'should compile LESS to a file && return the output', (done) ->
         flour.compile input_file, output_file, (res) ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include '.one .two'
             res.should.include '.one .two'
             done()
 
@@ -88,12 +90,15 @@ describe 'Stylus compiler', ->
             done()
 
     it 'should compile Stylus to a file', (done) ->
-        flour.compile input_file, output_file, (res) ->
-            res.should.include '.one .two'
+        flour.compile input_file, output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include '.one .two'
             done()
 
     it 'should compile Stylus to a file && return the output', (done) ->
         flour.compile input_file, output_file, (res) ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include '.one .two'
             res.should.include '.one .two'
             done()
 
