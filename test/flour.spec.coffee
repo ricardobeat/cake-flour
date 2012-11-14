@@ -27,8 +27,8 @@ describe 'Flour', ->
 
 describe 'CoffeeScript compiler', ->
 
-    input_file  = 'test/sources/test.coffee'
-    output_file = 'test/temp/test.js'
+    input_file  = 'test/sources/compile.coffee'
+    output_file = 'test/temp/compile.js'
 
     it 'should compile CoffeeScript and return the output', (done) ->
         flour.compile input_file, (output) ->
@@ -50,8 +50,8 @@ describe 'CoffeeScript compiler', ->
 
 describe 'LESS compiler', ->
 
-    input_file  = 'test/sources/test.less'
-    output_file = 'test/temp/test.css'
+    input_file  = 'test/sources/compile.less'
+    output_file = 'test/temp/compile.css'
 
     it 'should compile LESS and return the output', (done) ->
         flour.compile input_file, (output) ->
@@ -76,8 +76,34 @@ describe 'LESS compiler', ->
 
 describe 'Stylus compiler', ->
 
-    input_file  = 'test/sources/test.styl'
-    output_file = 'test/temp/test.css'
+    input_file  = 'test/sources/compile.styl'
+    output_file = 'test/temp/compile.css'
+
+    it 'should compile Stylus and return the output', (done) ->
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus to a file', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus to a file && return the output', (done) ->
+        flour.compile input_file, output_file, (res) ->
+            res.should.include '.one .two'
+            done()
+
+    it 'should compile Stylus with compression disabled', (done) ->
+        flour.compilers.styl.compress = false
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two {\n  color: #abcdef;\n}'
+            done()
+
+describe 'JS minifier', ->
+
+    input_file  = 'test/sources/compile.styl'
+    output_file = 'test/temp/compile.css'
 
     it 'should compile Stylus and return the output', (done) ->
         flour.compile input_file, (output) ->
