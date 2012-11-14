@@ -10,6 +10,10 @@
     "colors": "",
     "hound": ""
   },
+  "devDependencies": {
+    "mocha": "",
+    "should": ""
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/ricardobeat/cake-flour.git"
@@ -24,6 +28,9 @@
     "minify",
     "coffee-script"
   ],
+  "scripts": {
+    "test": "node_modules/.bin/mocha"
+  },
   "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
   "license": "MIT (ricardo.mit-license.org)"
 }
