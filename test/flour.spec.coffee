@@ -27,7 +27,7 @@ describe 'Flour', ->
 
 describe 'Compiler', ->
 
-    it 'should compile CoffeeScript', (done) ->
+    it 'should compile CoffeeScript and return the output', (done) ->
         flour.compile 'test/sources/test.coffee', (output) ->
             output.should.include 'bacon = function'
             done()
@@ -39,3 +39,10 @@ describe 'Compiler', ->
         contents = fs.readFileSync(output).toString()
         contents.should.include 'bacon = function'
         done()
+
+    it 'should compile CoffeeScript to a file && return the output', (done) ->
+        input  = 'test/sources/test.coffee'
+        output = 'test/temp/test.js'
+        flour.compile input, output, (res) ->
+            res.should.include 'bacon = function'
+            done()
