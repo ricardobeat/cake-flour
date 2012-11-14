@@ -98,6 +98,11 @@ flour =
 # Success handler. Writes to file if an output path was
 # provided, otherwise it just returns the result
 success = (dest, file, output, action, cb) ->
+    # Handle callback-only calls
+    #     flour.compile 'file', (output) ->
+    if typeof dest is 'function'
+        [cb, dest] = [dest, null]
+
     if dest?
         fs.writeFile dest, output, (err) -> cb? output
     else
