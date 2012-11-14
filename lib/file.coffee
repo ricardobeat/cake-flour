@@ -2,6 +2,8 @@ fs    = require 'fs'
 path  = require 'path'
 hound = require 'hound'
 
+logger = require './lib/logger'
+
 # File abstraction to simplify I/O, with caching.
 
 passthrough = (file, args..., cb) -> file.read cb
@@ -43,9 +45,9 @@ class File
             @watcher = hound.watch @path
             for evt in ['create', 'change', 'delete']
                 @watcher.on evt, fn
-            console.log "Watching".green, @path
+            logger.log "Watching".green, @path
         catch e
-            console.error "Error watching".red, @path, e
+            logger.error "Error watching".red, @path, e
         return @watcher
 
     toString: ->
