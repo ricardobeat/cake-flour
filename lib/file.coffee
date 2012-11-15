@@ -31,15 +31,15 @@ class File
             cb @buffer = data.toString()
 
     compile: (cb) ->
-        compiler = compilers[@ext] ? passthrough
+        compiler = compilers[@ext] or passthrough
         compiler.call compiler, @, cb.bind(@)
 
     minify: (cb) ->
-        minifier = minifiers[@ext] ? passthrough
+        minifier = minifiers[@ext] or passthrough
         minifier.call minifier, @, cb.bind(@)
 
     lint: (args, cb) ->
-        linter = linters[@ext] ? passthrough
+        linter = linters[@ext] or passthrough
         linter.call linter, @, cb.bind(@)
 
     watch: (fn) ->
