@@ -22,15 +22,17 @@ flour =
         file.minify (output) ->
             success dest, @, output, 'Minified', cb
 
-    lint: (file, args...) ->
-        file.lint args, (passed, errors) ->
+    lint: (file, cb) ->
+        file.lint (passed, errors) ->
             if passed
                 logger.log "OK".green.inverse, file.path
-                return
-            for e in errors
-                pos = "[L#{e.line}:C#{e.character}]"
-                logger.log pos.red, e.reason.grey
+                cb?()
+            else
                 logger.log "NOT OK".magenta.inverse, file.path.bold
+                for e in errors when e?
+                    pos = "[L#{e.line}:#{e.character}]"
+                    logger.log pos.red, e.reason.grey
+                    cb? errors
 
     bundle: (files, dest, cb) ->
 

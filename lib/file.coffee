@@ -38,7 +38,7 @@ class File
         minifier = minifiers[@ext] or passthrough
         minifier.call minifier, @, cb.bind(@)
 
-    lint: (args, cb) ->
+    lint: (cb) ->
         linter = linters[@ext] or passthrough
         linter.call linter, @, cb.bind(@)
 

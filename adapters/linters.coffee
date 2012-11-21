@@ -1,8 +1,9 @@
 module.exports =
 
-    js: (file, args, cb) ->
-        # accepts options: flour.lint 'file.js', [options], [globals]
+    js: (file, cb) ->
+        options = @options
+        globals = @globals
         jshint = (require 'jshint').JSHINT
         file.read (code) ->
-            passed = jshint.apply jshint, [code].concat(args)
+            passed = jshint code, options, globals
             cb passed, jshint.errors
