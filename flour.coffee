@@ -26,13 +26,12 @@ flour =
         file.lint (passed, errors) ->
             if passed
                 logger.log "OK".green.inverse, file.path
-                cb?()
             else
                 logger.log "NOT OK".magenta.inverse, file.path.bold
                 for e in errors when e?
                     pos = "[L#{e.line}:#{e.character}]"
                     logger.log pos.red, e.reason.grey
-                    cb? errors
+            cb? passed, errors
 
     bundle: (files, dest, cb) ->
 
