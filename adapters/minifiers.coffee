@@ -1,6 +1,7 @@
 module.exports =
 
     js: (file, cb) ->
-        { parser: jsp, uglify: pro } = require 'uglify-js'
+        uglify = require 'uglify-js'
         file.read (code) ->
-            cb pro.gen_code pro.ast_squeeze pro.ast_mangle jsp.parse code
+            res = uglify.minify code, { fromString: true }
+            cb res.code

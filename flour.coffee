@@ -4,11 +4,15 @@ util   = require 'util'
 domain = require 'domain'
 colors = require 'colors'
 
-File = require './lib/file'
+File   = require './lib/file'
+logger = require './lib/logger'
 
 # Main object / API
 
 flour =
+
+    silent: (state = true) ->
+        logger.silent = state
 
     compile: (file, dest, cb) ->
         file.compile (output) ->
@@ -18,15 +22,16 @@ flour =
         file.minify (output) ->
             success dest, @, output, 'Minified', cb
 
-    lint: (file, args...) ->
-        file.lint args, (passed, errors) ->
+    lint: (file, cb) ->
+        file.lint (passed, errors) ->
             if passed
-                console.log "OK".green.inverse, file.path
-                return
-            for e in errors
-                pos = "[L#{e.line}:C#{e.character}]"
-                console.log pos.red, e.reason.grey
-                console.log "NOT OK".magenta.inverse, file.path.bold
+                logger.log " OK ".green.inverse, file.path
+            else
+                logger.log " NOT OK ".magenta.inverse, file.path.bold
+                for e in errors when e?
+                    pos = "[L#{e.line}:#{e.character}]"
+                    logger.log pos.red, e.reason.grey
+            cb? passed, errors
 
     bundle: (files, dest, cb) ->
 
@@ -94,23 +99,28 @@ flour =
 # Success handler. Writes to file if an output path was
 # provided, otherwise it just returns the result
 success = (dest, file, output, action, cb) ->
+    # Handle callback-only calls
+    #     flour.compile 'file', (output) ->
+    if typeof dest is 'function'
+        [cb, dest] = [dest, null]
+
     if dest?
         fs.writeFile dest, output, (err) -> cb? output
     else
         cb output
 
-    console.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
+    logger.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
 
 # Error handler
 failed = (what, file, e) ->
-    console.error "Error #{what}".red.inverse, file?.toString()
+    logger.error "Error #{what}".red.inverse, file?.toString()
     if e.type and e.filename
-        console.error "[L#{e.line}:C#{e.column}]".yellow,
+        logger.error "[L#{e.line}:C#{e.column}]".yellow,
             "#{e.type} error".yellow
             "in #{e.filename}:".grey
             e.message
     else
-        console.error e.type?.yellow, e.message?.grey
+        logger.error e.type?.yellow, e.message?.grey
 
 # Overwrite all methods that accept a file parameter to:
 #   - accept both arrays and *.xxx paths

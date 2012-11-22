@@ -1,18 +1,20 @@
 {
   "name": "flour",
-  "version": "0.3.2",
+  "version": "0.4.3",
   "description": "Cakefile extension for simpler build scripts",
   "main": "flour.coffee",
-  "scripts": {
-    "test": ""
-  },
   "dependencies": {
     "colors": "",
     "hound": ""
   },
   "devDependencies": {
-    "mocha": "",
-    "should": ""
+    "mocha": "*",
+    "should": "*",
+    "uglify-js": ">2.0",
+    "jshint": "*",
+    "coffee-script": "*",
+    "stylus": "*",
+    "nib": "*"
   },
   "repository": {
     "type": "git",

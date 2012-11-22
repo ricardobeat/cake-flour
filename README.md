@@ -3,17 +3,7 @@ Flour
 
 **Flour** is a set of simple build tools for your Cakefiles.
 
-#### Changelog
-
-##### v0.3.2
-- add [node-hound](http://github.com/beefsack/node-hound) as a dependency for file watching
-- watch whole directory trees: `watch `src/`, -> invoke 'build' (listens for new files and deletes too)
-- fix error handlers leak
-
-##### v0.3.1
-- fix extension handling bug
-##### v0.3.0
-- flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's `package.json`
+[Changelog](#changelog)
 
 ![image](http://i.imgur.com/yIxF9.jpg)
 
@@ -38,8 +28,11 @@ This is what a typical Cakefile could look like:
 
     require 'flour'
 
-    task 'lint', 'Check javascript syntax', ->
-        lint 'js/feature.js'
+    task 'build:coffee', ->
+        compile 'coffee/app.coffee', 'js/app.js'
+
+    task 'build:less', ->
+        compile 'less/main.less', 'css/main.css'
 
     task 'build:plugins', ->
         bundle [
@@ -47,12 +40,6 @@ This is what a typical Cakefile could look like:
             'vendor/hogan.js'
             'vendor/backbone.js'
         ], 'js/plugins.js'
-
-    task 'build:coffee', ->
-        compile 'coffee/app.coffee', 'js/app.js'
-
-    task 'build:less', ->
-        compile 'less/main.less', 'css/main.css'
 
     task 'build', ->
         invoke 'build:plugins'
@@ -66,9 +53,12 @@ This is what a typical Cakefile could look like:
         watch 'less/*.less', -> invoke 'build:less'
         watch 'coffee/app.coffee', -> invoke 'build:coffee'
 
+    task 'lint', 'Check javascript syntax', ->
+        lint 'js/feature.js'
+
 (if the global pollution hurts your feelings you can remove them with `flour.noConflict()`. That will bring the global object back to it's previous state)
 
-Each of these functions can accept either a single file path or an array of files. Simple wildcard paths like `*.xxx` are also accepted. Example using `watch` with a list of files:
+Each of these functions accepts either a file path or a list of files. Simple wildcard paths (`*.xxx`) are allowed. For example:
 
     watch [
         'less/main.less'
@@ -82,7 +72,7 @@ You can also access the resulting output by passing a callback:
         # do something with the compiled output
         mail.send subject: 'Project file', to: 'grandma@hotmail.com', body: output
 
-    # if you don't trust the CS compiler
+    # verify the CoffeeScript compiler output
     compile 'coffee/app.coffee', 'js/app.js', -> lint 'js/app.js'
 
 ## Adapters
@@ -122,6 +112,11 @@ Compiles CoffeeScript, LESS or Stylus files:
 
     compile 'cold.coffee', (output) ->
         console.log output.transform()
+
+You can disable compression for LESS or Stylus with
+
+    flour.compilers.less.compress = false
+    flour.compilers.styl.compress = false
 
 ### Bundle
 
@@ -225,6 +220,23 @@ While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have
 
 The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.
 
-#### TODO:
-- tests
-- figure out how to magically bundle hogan templates
+#### Changelog <a name="changelog"></a>
+
+##### v0.4.0
+- tests!
+- fix file buffer bug
+- accept options for adapters, enables disabling compression for LESS and Stylus
+
+##### v0.3.3
+- bugfixes
+
+##### v0.3.2
+- add [node-hound](http://github.com/beefsack/node-hound) as a dependency for file watching
+- watch whole directory trees: `watch `src/`, -> invoke 'build' (listens for new files and deletes too)
+- fix error handlers leak
+
+##### v0.3.1
+- fix extension handling bug
+
+##### v0.3.0
+- flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's `package.json`

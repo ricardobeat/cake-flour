@@ -2,6 +2,8 @@ fs    = require 'fs'
 path  = require 'path'
 hound = require 'hound'
 
+logger = require './logger'
+
 # File abstraction to simplify I/O, with caching.
 
 passthrough = (file, args..., cb) -> file.read cb
@@ -24,18 +26,21 @@ class File
 
     read: (cb) ->
         return cb @buffer if @buffer?
-        fs.readFile @path, (err, data) ->
+        fs.readFile @path, (err, data) =>
             throw err if err
             cb @buffer = data.toString()
 
     compile: (cb) ->
-        (compilers[@ext] ? passthrough) @, cb.bind(@)
+        compiler = compilers[@ext] or passthrough
+        compiler.call compiler, @, cb.bind(@)
 
     minify: (cb) ->
-        (minifiers[@ext] ? passthrough) @, cb.bind(@)
+        minifier = minifiers[@ext] or passthrough
+        minifier.call minifier, @, cb.bind(@)
 
-    lint: (args, cb) ->
-        (linters[@ext] ? passthrough) @, args, cb.bind(@)
+    lint: (cb) ->
+        linter = linters[@ext] or passthrough
+        linter.call linter, @, cb.bind(@)
 
     watch: (fn) ->
         fn = fn.bind @
@@ -43,9 +48,9 @@ class File
             @watcher = hound.watch @path
             for evt in ['create', 'change', 'delete']
                 @watcher.on evt, fn
-            console.log "Watching".green, @path
+            logger.log "Watching".green, @path
         catch e
-            console.error "Error watching".red, @path, e
+            logger.error "Error watching".red, @path, e
         return @watcher
 
     toString: ->
