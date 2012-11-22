@@ -8,8 +8,13 @@
     "hound": ""
   },
   "devDependencies": {
-    "mocha": "",
-    "should": ""
+    "mocha": "*",
+    "should": "*",
+    "uglify-js": ">2.0",
+    "jshint": "*",
+    "coffee-script": "*",
+    "stylus": "*",
+    "nib": "*"
   },
   "repository": {
     "type": "git",
