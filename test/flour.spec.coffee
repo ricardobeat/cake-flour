@@ -124,3 +124,20 @@ describe 'JS minifier', ->
             contents = fs.readFileSync(output_file).toString()
             contents.should.include 'function test(){return'
             done()
+
+
+describe 'CSS minifier', ->
+
+    input_file  = 'test/sources/minify.css'
+    output_file = 'test/temp/minify.min.css'
+
+    it 'should minify css and return the output', (done) ->
+        flour.minify input_file, (output) ->
+            output.should.include 'body,p{color:red}'
+            done()
+
+    it 'should minify css to a file', (done) ->
+        flour.minify input_file, output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'body,p{color:red}'
+            done()
