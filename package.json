@@ -14,7 +14,9 @@
     "jshint": "*",
     "coffee-script": "*",
     "stylus": "*",
-    "nib": "*"
+    "less": "*",
+    "nib": "*",
+    "csso": "*"
   },
   "repository": {
     "type": "git",
