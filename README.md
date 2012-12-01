@@ -222,6 +222,9 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.4.4
+- add back support for uglify-js < 2.0
+
 ##### v0.4.0
 - tests!
 - fix file buffer bug
