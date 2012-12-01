@@ -1,0 +1,1 @@
+function bundle2 () { return 2; }

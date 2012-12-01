@@ -35,7 +35,10 @@ flour =
 
     bundle: (files, dest, cb) ->
 
-        if not util.isArray files
+        if typeof files is 'string' and fs.existsSync files
+            return flour.bundle [files], dest, cb
+
+        unless util.isArray files
             flour.getFiles files, (results) ->
                 flour.bundle results, dest, cb
             return

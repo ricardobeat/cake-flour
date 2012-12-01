@@ -1,5 +1,6 @@
 should = require 'should'
 fs     = require 'fs'
+path   = require 'path'
 
 flour  = require '../flour'
 
@@ -24,7 +25,6 @@ describe 'Flour', ->
 
     it 'should expose a watch method', ->
         flour.bundle.should.be.a('function')
-
 
 describe 'CoffeeScript compiler', ->
 
@@ -140,4 +140,35 @@ describe 'CSS minifier', ->
         flour.minify input_file, output_file, ->
             contents = fs.readFileSync(output_file).toString()
             contents.should.include 'body,p{color:red}'
+            done()
+
+describe 'Bundle', ->
+
+    sources = 'test/sources'
+    output_file = 'test/temp/bundled.js'
+
+    it 'should minify and join an array of JS files', (done) ->
+        flour.bundle [
+            "#{sources}/bundle1.js"
+            "#{sources}/bundle2.js"
+        ], output_file,  ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'function bundle1()'
+            contents.should.include 'function bundle2()'
+            done()
+
+    it 'should compile, minify and join an array of coffeescript files', (done) ->
+        flour.bundle [
+            "#{sources}/bundle1.coffee"
+            "#{sources}/bundle2.coffee"
+        ], output_file,  ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function()'
+            contents.should.include 'bundle2=function()'
+            done()
+
+    it 'should compile and minify a single file', (done) ->
+        flour.bundle "#{sources}/bundle1.coffee", output_file,  ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function()'
             done()
