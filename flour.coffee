@@ -3,6 +3,7 @@ path   = require 'path'
 util   = require 'util'
 domain = require 'domain'
 colors = require 'colors'
+mm     = require 'minimatch'
 
 File   = require './lib/file'
 logger = require './lib/logger'
@@ -35,13 +36,12 @@ flour =
 
     bundle: (files, dest, cb) ->
 
-        if typeof files is 'string' and fs.existsSync files
-            return flour.bundle [files], dest, cb
-
         unless util.isArray files
-            flour.getFiles files, (results) ->
+            return flour.getFiles files, (results) ->
                 flour.bundle results, dest, cb
-            return
+
+        if files.length is 0
+            throw new Error 'No files match'
 
         results = []
         counter = 0
@@ -71,11 +71,20 @@ flour =
 
     # Get a list of files from a wildcard path (*.ext)
     getFiles: (filepath, cb) ->
-        ext = path.extname filepath
-        dir = path.dirname filepath
+        dir     = path.dirname filepath
+        pattern = path.basename filepath
+
+        try stats = fs.statSync filepath
+
+        if stats?.isFile()
+            return cb [filepath]
+
+        if stats?.isDirectory()
+            dir = filepath
+            pattern = '*.*'
 
         fs.readdir dir, (err, results) ->
-            results = results.filter (f) -> path.extname(f) is ext
+            results = results.filter mm.filter pattern
             results = results.map (f) -> path.join dir, f
             cb results
 
@@ -84,7 +93,7 @@ flour =
         file = new File filepath
 
         if file.base is '*'
-            getFiles filepath, (files) ->
+            flour.getFiles filepath, (files) ->
                 results = []
                 count = files.length
                 files.forEach (f, i) ->

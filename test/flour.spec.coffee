@@ -144,13 +144,14 @@ describe 'CSS minifier', ->
 
 describe 'Bundle', ->
 
-    sources = 'test/sources'
+    sources_js  = 'test/sources/bundle-js'
+    sources_cs  = 'test/sources/bundle-coffee'
     output_file = 'test/temp/bundled.js'
 
     it 'should minify and join an array of JS files', (done) ->
         flour.bundle [
-            "#{sources}/bundle1.js"
-            "#{sources}/bundle2.js"
+            "#{sources_js}/bundle1.js"
+            "#{sources_js}/bundle2.js"
         ], output_file,  ->
             contents = fs.readFileSync(output_file).toString()
             contents.should.include 'function bundle1()'
@@ -159,8 +160,8 @@ describe 'Bundle', ->
 
     it 'should compile, minify and join an array of coffeescript files', (done) ->
         flour.bundle [
-            "#{sources}/bundle1.coffee"
-            "#{sources}/bundle2.coffee"
+            "#{sources_cs}/bundle1.coffee"
+            "#{sources_cs}/bundle2.coffee"
         ], output_file,  ->
             contents = fs.readFileSync(output_file).toString()
             contents.should.include 'bundle1=function()'
@@ -168,7 +169,42 @@ describe 'Bundle', ->
             done()
 
     it 'should compile and minify a single file', (done) ->
-        flour.bundle "#{sources}/bundle1.coffee", output_file,  ->
+        flour.bundle "#{sources_cs}/bundle1.coffee", output_file,  ->
             contents = fs.readFileSync(output_file).toString()
             contents.should.include 'bundle1=function()'
+            done()
+
+    it 'should accept a simple wildcard path', (done) ->
+        flour.bundle "#{sources_cs}/*.coffee", output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function('
+            contents.should.include 'bundle2=function('
+            done()
+
+    it 'should accept a complex wildcard path', (done) ->
+        flour.bundle "#{sources_cs}/bun*1.coffee", output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function('
+            contents.should.not.include 'bundle2=function('
+            done()
+
+    it 'should accept a more complex wildcard path', (done) ->
+        flour.bundle "#{sources_cs}/bun*1.+(coffee|js)", output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function('
+            contents.should.not.include 'bundle2=function('
+            done()
+
+    it 'should accept a directory path', (done) ->
+        flour.bundle "#{sources_cs}", output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function('
+            contents.should.include 'bundle2=function('
+            done()
+
+    it 'should accept a directory path with a trailing slash', (done) ->
+        flour.bundle "#{sources_cs}/", output_file, ->
+            contents = fs.readFileSync(output_file).toString()
+            contents.should.include 'bundle1=function('
+            contents.should.include 'bundle2=function('
             done()
