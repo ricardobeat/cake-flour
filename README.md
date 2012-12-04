@@ -222,8 +222,9 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
-##### v0.4.5
+##### v0.4.5 / v0.4.6
 - handle single file path as input for bundle()
+- better handling of wildcard paths using [minimatch](http://github.com/isaacs/minimatch)
 
 ##### v0.4.4
 - add back support for uglify-js < 2.0
