@@ -3,8 +3,14 @@ module.exports =
     coffee: (file, cb) ->
         coffee = require 'coffee-script'
 
+        options = {
+            bare: @bare ? false
+            filename: file.path
+            header: @header ? false
+        }
+
         file.read (code) ->
-            cb coffee.compile code
+            cb coffee.compile code, options
 
     less: (file, cb) ->
         less = require 'less'
