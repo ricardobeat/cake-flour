@@ -1,6 +1,7 @@
-fs    = require 'fs'
-path  = require 'path'
-hound = require 'hound'
+fs     = require 'fs'
+path   = require 'path'
+domain = require 'domain'
+hound  = require 'hound'
 
 logger = require './logger'
 
@@ -24,6 +25,10 @@ class File
 
         @lastChange = 0
 
+        @domain = domain.create()
+        @domain.on 'error', (err) =>
+            logger.fail @action, @path, err
+
     read: (cb) ->
         return cb @buffer if @buffer?
         fs.readFile @path, (err, data) =>
@@ -31,16 +36,22 @@ class File
             cb @buffer = data.toString()
 
     compile: (cb) ->
+        @action = 'compiling'
         compiler = compilers[@ext] or passthrough
-        compiler.call compiler, @, cb.bind(@)
+        @domain.run =>
+            compiler.call compiler, @, cb.bind(@)
 
     minify: (cb) ->
+        @action = 'minifying'
         minifier = minifiers[@ext] or passthrough
-        minifier.call minifier, @, cb.bind(@)
+        @domain.run =>
+            minifier.call minifier, @, cb.bind(@)
 
     lint: (cb) ->
+        @action = 'linting'
         linter = linters[@ext] or passthrough
-        linter.call linter, @, cb.bind(@)
+        @domain.run =>
+            linter.call linter, @, cb.bind(@)
 
     watch: (fn) ->
         fn = fn.bind @
@@ -50,7 +61,7 @@ class File
                 @watcher.on evt, fn
             logger.log "Watching".green, @path
         catch e
-            logger.error "Error watching".red, @path, e
+            logger.fail 'watching', @path, e
         return @watcher
 
     toString: ->

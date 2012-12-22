@@ -123,17 +123,6 @@ success = (dest, file, output, action, cb) ->
 
     logger.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
 
-# Error handler
-failed = (what, file, e) ->
-    logger.error "Error #{what}".red.inverse, file?.toString()
-    if e.type and e.filename
-        logger.error "[L#{e.line}:C#{e.column}]".yellow,
-            "#{e.type} error".yellow
-            "in #{e.filename}:".grey
-            e.message
-    else
-        logger.error e.type?.yellow, e.message?.grey
-
 # Overwrite all methods that accept a file parameter to:
 #   - accept both arrays and *.xxx paths
 #   - capture errors using domains
@@ -146,7 +135,7 @@ failed = (what, file, e) ->
 
         dm = domain.create()
         dm.on 'error', (err) ->
-            failed "#{method.replace(/e$/,'')}ing", file, err
+            logger.fail "#{method.replace(/e$/,'')}ing", file, err
 
         if util.isArray file
             dm.bind(original).apply flour, [new File f].concat(rest) for f in file

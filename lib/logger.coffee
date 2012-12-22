@@ -16,4 +16,14 @@ methods.forEach (method) ->
         return if logger.silent
         console[method].apply console, Array::slice.call arguments
 
+logger.fail = (what, file, e) ->
+    logger.error "Error #{what}".red.inverse, file?.toString()
+    if e.type and e.filename
+        logger.error "[L#{e.line}:C#{e.column}]".yellow,
+            "#{e.type} error".yellow
+            "in #{e.filename}:".grey
+            e.message
+    else
+        logger.error [e.type].toString().yellow, [e.message].toString().grey
+
 module.exports = logger
