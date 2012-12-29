@@ -8,6 +8,8 @@ mm     = require 'minimatch'
 File   = require './lib/file'
 logger = require './lib/logger'
 
+isWild = (str) -> /[*!{}|}]/.test str
+
 # Main object / API
 
 flour =
@@ -90,18 +92,16 @@ flour =
 
     # Get file(s)' contents
     get: (filepath, cb) ->
-        file = new File filepath
-
-        if file.base is '*'
-            flour.getFiles filepath, (files) ->
+        if isWild filepath
+            return flour.getFiles filepath, (files) ->
                 results = []
                 count = files.length
                 files.forEach (f, i) ->
                     new File(f).read (output) ->
                         results[i] = output
                         if --count is 0 then cb results
-        else
-            file.read cb
+
+        new File(filepath).read cb
 
     # Load adapters
     minifiers : require './adapters/minifiers'
@@ -146,7 +146,7 @@ success = (dest, file, output, action, cb) ->
         file = new File file
 
         # Handle wildcard paths.
-        if file.base is '*'
+        if isWild file.base
             flour.getFiles file.path, (files) ->
                 flour[method].apply flour, [files].concat(rest)
             return
