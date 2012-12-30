@@ -7,11 +7,11 @@ mm     = require 'minimatch'
 
 File   = require './lib/file'
 logger = require './lib/logger'
+ERROR  = require './lib/errors'
 
 isWild = (str) -> /[*!{}|}]/.test str
 
 # Main object / API
-
 flour =
 
     silent: (state = true) ->
@@ -40,10 +40,11 @@ flour =
 
         unless util.isArray files
             return flour.getFiles files, (results) ->
+                results.filepath = files
                 flour.bundle results, dest, cb
 
         if files.length is 0
-            throw new Error 'No files match'
+            throw ERROR.NO_MATCH files.filepath
 
         results = []
         counter = 0
@@ -111,15 +112,31 @@ flour =
 # Success handler. Writes to file if an output path was
 # provided, otherwise it just returns the result
 success = (dest, file, output, action, cb) ->
-    # Handle callback-only calls
-    #     flour.compile 'file', (output) ->
+
+    # flour.compile 'file.js', (output) ->
     if typeof dest is 'function'
         [cb, dest] = [dest, null]
 
-    if dest?
-        fs.writeFile dest, output, (err) -> cb? output
+    # flour.compile 'src/*.coffee', '*'
+    else if dest is '*' or dest is '.' or dest is null or dest is ''
+        dest = file.target()
+
+    # flour.compile 'src/*.coffee', 'js/'
     else
-        cb output
+        dir_dest = dest
+        unless dir_dest[-1..] is '/'
+            dir_dest = path.dirname dest
+            basename = path.basename dest
+
+        try stats = fs.statSync dir_dest
+        if (!basename or basename is '*') and stats?.isDirectory()
+            dest = file.target dir_dest
+
+    if dest?
+        dest = path.join process.cwd(), dest
+        fs.writeFile dest, output, (err) -> cb? output, file
+    else
+        cb? output, file
 
     logger.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
 
@@ -131,23 +148,43 @@ success = (dest, file, output, action, cb) ->
 
     original = flour[method]
 
-    flour[method] = (file, rest...) ->
+    flour[method] = (files, rest...) ->
 
         dm = domain.create()
         dm.on 'error', (err) ->
-            logger.fail "#{method.replace(/e$/,'')}ing", file, err
+            logger.fail "#{method.replace(/e$/,'')}ing", files.filepath or files, err
 
-        if util.isArray file
-            dm.bind(original).apply flour, [new File f].concat(rest) for f in file
+        if util.isArray files
+            throw ERROR.NO_MATCH files.filepath if files.length < 1
+
+            # Handle multiple file outputs. Buffer results and
+            # call the callback function a single time.
+            callback = rest[rest.length-1]
+            if typeof callback is 'function'
+                results = []
+                count = files.length
+                proxy_cb = (i) -> (output, file) ->
+                    results[i*2] = output
+                    results[i*2+1] = file
+                    if --count is 0 then callback.apply this, results
+                rest[rest.length-1] = proxy_cb
+
+            for file, i in files
+                rest[rest.length-1] = proxy_cb i
+                dm.bind(original).apply flour, [new File file].concat(rest)
+
             return
 
         # Create a File object with the given path. If it turns out
         # to be a wildcard path, we just discard it.
-        file = new File file
+        file = new File files
 
         # Handle wildcard paths.
         if isWild file.base
             flour.getFiles file.path, (files) ->
+                # Make the file name available to the proxied function
+                # (there is probably a better way)
+                files.filepath = file.path
                 flour[method].apply flour, [files].concat(rest)
             return
 

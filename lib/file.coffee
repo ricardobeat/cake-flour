@@ -64,6 +64,14 @@ class File
             logger.fail 'watching', @path, e
         return @watcher
 
+    targetExtension: ->
+        switch @ext
+            when 'less', 'styl' then 'css'
+            when 'coffee'       then 'js'
+
+    target: (dir) ->
+        path.join dir or @dir, "#{@base}.#{@targetExtension()}"
+
     toString: ->
         @path
 

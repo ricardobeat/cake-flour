@@ -5,6 +5,7 @@ path   = require 'path'
 flour  = require '../flour'
 
 readFile = (file) -> fs.readFileSync(file).toString()
+copyFile = (file, out) -> fs.writeFileSync out, readFile file
 
 dir =
     sources: 'test/sources'
@@ -145,13 +146,14 @@ describe 'Bundle', ->
     sources_js  = "#{dir.sources}/bundle-js"
     sources_cs  = "#{dir.sources}/bundle-coffee"
     output_file = "#{dir.temp}/bundled.js"
+    output_js   = "#{dir.temp}/bundled-js.js"
 
     it 'should minify and join an array of JS files', (done) ->
         flour.bundle [
-            "#{sources_js}/bundle1.js"
-            "#{sources_js}/bundle2.js"
-        ], output_file,  ->
-            contents = readFile output_file
+            "#{sources_js}/jsbundle1.js"
+            "#{sources_js}/jsbundle2.js"
+        ], output_js,  ->
+            contents = readFile output_js
             contents.should.include 'function bundle1()'
             contents.should.include 'function bundle2()'
             done()
@@ -205,3 +207,41 @@ describe 'Bundle', ->
             contents.should.include 'bundle1=function('
             contents.should.include 'bundle2=function('
             done()
+
+describe 'File path handling', ->
+
+    m1 = "#{dir.temp}/multi1.js"
+    m2 = "#{dir.temp}/multi2.js"
+
+    copyFile "#{dir.sources}/multiple/multi1.coffee", "#{dir.temp}/multi1.coffee"
+    copyFile "#{dir.sources}/multiple/multi2.coffee", "#{dir.temp}/multi2.coffee"
+
+    checkMultipleFiles = (done) -> ->
+        should.exist fs.existsSync m1
+        readFile(m1).should.include 'multiple 1'
+        should.exist fs.existsSync m2
+        readFile(m2).should.include 'multiple 2'
+        fs.unlinkSync m1
+        fs.unlinkSync m2
+        done()
+
+    it 'should compile multiple files (*)', (done) ->
+        flour.compile "#{dir.temp}/multi*.coffee", "*", checkMultipleFiles done
+
+    it 'should compile multiple files (*), arguments in the the right order', (done) ->
+        flour.compile "#{dir.temp}/multi*.coffee", "*", (res1, file1, res2, file2) ->
+            res1.should.include 'multiple 1'
+            res2.should.include 'multiple 2'
+            done()
+
+    it 'should compile multiple files (folder)', (done) ->
+        flour.compile "#{dir.sources}/multiple/*.coffee", "#{dir.temp}", checkMultipleFiles done
+
+    it 'should compile multiple files (folder/)', (done) ->
+        flour.compile "#{dir.sources}/multiple/*.coffee", "#{dir.temp}/", checkMultipleFiles done
+
+    it 'should compile multiple files (folder/*)', (done) ->
+        flour.compile "#{dir.sources}/multiple/*.coffee", "#{dir.temp}/*", checkMultipleFiles done
+
+    it 'should compile multiple files (null)', (done) ->
+        flour.compile "#{dir.temp}/multi*.coffee", null, checkMultipleFiles done
