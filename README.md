@@ -222,6 +222,9 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.4.8
+- output to multiple files with `flour.compile 'src/*.coffee', '*'` and variations
+
 ##### v0.4.5 / v0.4.6
 - handle single file path as input for bundle()
 - better handling of wildcard paths using [minimatch](http://github.com/isaacs/minimatch)
