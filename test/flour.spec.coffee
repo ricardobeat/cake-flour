@@ -229,9 +229,11 @@ describe 'File path handling', ->
         flour.compile "#{dir.temp}/multi*.coffee", "*", checkMultipleFiles done
 
     it 'should compile multiple files (*), arguments in the the right order', (done) ->
-        flour.compile "#{dir.temp}/multi*.coffee", "*", (res1, file1, res2, file2) ->
-            res1.should.include 'multiple 1'
-            res2.should.include 'multiple 2'
+        flour.compile "#{dir.temp}/multi*.coffee", "*", (files) ->
+            files['multi1.coffee'].should.be.a 'object'
+            files['multi2.coffee'].should.be.a 'object'
+            files['multi1.coffee'].output.should.include 'multiple 1'
+            files['multi2.coffee'].output.should.include 'multiple 2'
             done()
 
     it 'should compile multiple files (folder)', (done) ->

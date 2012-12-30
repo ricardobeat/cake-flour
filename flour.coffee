@@ -158,19 +158,17 @@ success = (dest, file, output, action, cb) ->
             throw ERROR.NO_MATCH files.filepath if files.length < 1
 
             # Handle multiple file outputs. Buffer results and
-            # call the callback function a single time.
+            # apply the callback when all files are done.
             callback = rest[rest.length-1]
-            if typeof callback is 'function'
-                results = []
+            if typeof callback is 'function' and method isnt 'watch'
+                results = {}
                 count = files.length
                 proxy_cb = (i) -> (output, file) ->
-                    results[i*2] = output
-                    results[i*2+1] = file
-                    if --count is 0 then callback.apply this, results
-                rest[rest.length-1] = proxy_cb
+                    results[file.name] = { output, file }
+                    if --count is 0 then callback.call this, results
 
             for file, i in files
-                rest[rest.length-1] = proxy_cb i
+                rest[rest.length-1] = proxy_cb i if proxy_cb
                 dm.bind(original).apply flour, [new File file].concat(rest)
 
             return
