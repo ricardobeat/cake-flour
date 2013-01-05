@@ -247,3 +247,15 @@ describe 'File path handling', ->
 
     it 'should compile multiple files (null)', (done) ->
         flour.compile "#{dir.temp}/multi*.coffee", null, checkMultipleFiles done
+
+    it 'should lint multiple files', (done) ->
+        flour.lint "#{dir.sources}/lint/*.js", (results) ->
+            [a, b] = [results['lint-1.js'], results['lint-2.js']]
+            should.exist a
+            should.exist b
+            should.equal a.passed, true
+            should.equal b.passed, true
+            should.equal a.errors.constructor, Array
+            should.equal b.errors.constructor, Array
+            done()
+            

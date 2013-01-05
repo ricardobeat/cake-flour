@@ -164,7 +164,11 @@ success = (dest, file, output, action, cb) ->
                 results = {}
                 count = files.length
                 proxy_cb = (i) -> (output, file) ->
-                    results[file.name] = { output, file }
+                    if method is 'lint'
+                        [passed, errors, file] = arguments
+                        results[file.name] = { passed, errors, file }
+                    else
+                        results[file.name] = { output, file }
                     if --count is 0 then callback.call this, results
 
             for file, i in files
