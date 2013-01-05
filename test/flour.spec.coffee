@@ -110,6 +110,17 @@ describe 'Stylus compiler', ->
             done()
 
 
+describe 'JS lint', ->
+
+    input_file  = "#{dir.sources}/lint.js"
+
+    it 'should pass the file in lint', (done) ->
+        flour.lint input_file, (output, file) ->
+            output.should.have.length 1
+            file.name.should.equal 'lint.js'
+            done()
+
+
 describe 'JS minifier', ->
 
     input_file  = "#{dir.sources}/minify.js"
