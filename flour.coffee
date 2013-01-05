@@ -34,7 +34,7 @@ flour =
                 for e in errors when e?
                     pos = "[L#{e.line}:#{e.character}]"
                     logger.log pos.red, e.reason.grey
-            cb? passed, errors
+            cb? passed, errors, file
 
     bundle: (files, dest, cb) ->
 
