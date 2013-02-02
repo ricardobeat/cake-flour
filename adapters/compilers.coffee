@@ -16,7 +16,8 @@ module.exports =
         less = require 'less'
 
         options = {
-            compress: @compress ? true
+            compress: @compress ? (not @yuicompress)
+            yuicompress: @yuicompress ? false
         }
 
         parser = new less.Parser { paths: [file.dir] }

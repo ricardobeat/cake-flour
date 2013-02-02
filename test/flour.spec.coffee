@@ -81,6 +81,12 @@ describe 'LESS compiler', ->
             output.should.include '.one .two {\n  color: #abcdef;\n}'
             done()
 
+    it 'should compile LESS with yui compression enabled', (done) ->
+        flour.compilers.less.yuicompress = true
+        flour.compile input_file, (output) ->
+            output.should.include '.one .two{color:#abcdef}'
+            done()
+
 
 describe 'Stylus compiler', ->
 
@@ -258,4 +264,3 @@ describe 'File path handling', ->
             should.equal a.errors.constructor, Array
             should.equal b.errors.constructor, Array
             done()
-            
