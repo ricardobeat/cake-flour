@@ -222,6 +222,11 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.4.9
+- fix lint callback arguments
+- **breaking change**: call callback only once when watching multiple files. each file is a key in the results object
+- add yuicompress option for LESS compiler
+
 ##### v0.4.8
 - output to multiple files with `flour.compile 'src/*.coffee', '*'` and variations
 
