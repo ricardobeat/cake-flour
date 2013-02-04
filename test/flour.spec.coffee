@@ -66,7 +66,7 @@ describe 'LESS compiler', ->
 
     it 'should compile LESS to a file', (done) ->
         flour.compile input_file, output_file, ->
-            readFile(output_file).should.include '.one .two'
+            readFile(output_file).should.include '.one .two{color' # compressed by default
             done()
 
     it 'should compile LESS to a file && return the output', (done) ->
