@@ -34,7 +34,7 @@
     "coffee-script"
   ],
   "scripts": {
-    "test": "node_modules/.bin/mocha"
+    "test": "mocha"
   },
   "author": "Ricardo Tomasi <ricardobeat@gmail.com>",
   "license": "MIT (ricardo.mit-license.org)"
