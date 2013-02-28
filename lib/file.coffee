@@ -16,7 +16,6 @@ linters   = require '../adapters/linters'
 class File
 
     constructor: (file, @buffer) ->
-        return file if file instanceof File
         @path = file
         @ext  = path.extname(file).replace /^\./, ''
         @name = path.basename file
