@@ -115,22 +115,29 @@ success = (dest, file, output, action, cb) ->
 
     # flour.compile 'file.js', (output) ->
     if typeof dest is 'function'
-        [cb, dest] = [dest, null]
+        cb   = dest
+        dest = undefined
 
-    # flour.compile 'src/*.coffee', '*'
-    else if dest is '*' or dest is '.' or dest is null or dest is ''
-        dest = file.target()
+    # Handle special path cases
+    dest = do ->
+        # Destination is `*` or nil, use file's own path
+        # (`compile 'file.js', '*'`)
+        return file.target() if dest in ['*', '.', ''] or dest is null
 
-    # flour.compile 'src/*.coffee', 'js/'
-    else
-        dir_dest = dest
-        unless dir_dest[-1..] is '/'
-            dir_dest = path.dirname dest
-            basename = path.basename dest
+        # Destination is a directory, use path + own file name 
+        try stats = fs.statSync dest
+        return file.target(dest) if stats && stats.isDirectory()
 
-        try stats = fs.statSync dir_dest
-        if (!basename or basename is '*') and stats?.isDirectory()
-            dest = file.target dir_dest
+        basename = path.basename dest
+        dirname  = path.dirname dest
+
+        # Destination is a directory, trailing slash
+        return file.target(path.join dirname, basename) if basename.slice(-1) is path.sep
+
+        # Destination is a directory followed by '/*'
+        return file.target(dirname) if basename is '*'
+
+        return dest
 
     if dest?
         dest = path.join process.cwd(), dest
