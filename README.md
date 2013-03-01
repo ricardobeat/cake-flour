@@ -222,6 +222,9 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.4.11
+- mkdir_p on compile (#20)
+
 ##### v0.4.10
 - compatibility fix for CoffeeScript 1.5.0
 
