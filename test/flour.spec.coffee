@@ -44,9 +44,9 @@ describe 'CoffeeScript compiler', ->
             done()
 
     it 'should compile CoffeeScript to a file', (done) ->
-        flour.compile input_file, output_file
-        readFile(output_file).should.include 'bacon = function'
-        done()
+        flour.compile input_file, output_file, ->
+            readFile(output_file).should.include 'bacon = function'
+            done()
 
     it 'should compile CoffeeScript to a file && return the output', (done) ->
         flour.compile input_file, output_file, (res) ->
@@ -263,4 +263,11 @@ describe 'File path handling', ->
             should.equal b.passed, true
             should.equal a.errors.constructor, Array
             should.equal b.errors.constructor, Array
+            done()
+
+    it 'should create output dir if needed', (done) ->
+        flour.compile "#{dir.sources}/compile.coffee", "#{dir.temp}/a/b/c/*", ->
+            out = "#{dir.temp}/a/b/c/compile.js"
+            should.exist fs.existsSync out
+            readFile(out).should.include 'bacon = function'
             done()

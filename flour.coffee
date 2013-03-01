@@ -139,6 +139,16 @@ success = (dest, file, output, action, cb) ->
 
         return dest
 
+    # mkdir --parents if needed
+    dirname = path.dirname dest
+    unless fs.existsSync dirname
+        parts = dirname.split(path.sep)
+        parts.reduce (p, part, i) ->
+            p = path.join p, part
+            fs.mkdirSync p unless fs.existsSync p
+            return p
+        , ''
+
     if dest?
         dest = path.join process.cwd(), dest
         fs.writeFile dest, output, (err) -> cb? output, file
