@@ -38,10 +38,11 @@ flour =
 
     bundle: (files, dest, cb) ->
 
-        unless util.isArray files
-            return flour.getFiles files, (results) ->
-                results.filepath = files
-                flour.bundle results, dest, cb
+        return flour.getFiles files, (results) ->
+            results.filepath = files
+            flour.bundleFiles results, dest, cb
+
+    bundleFiles: (files, dest, cb) ->
 
         if files.length is 0
             throw ERROR.NO_MATCH files.filepath
@@ -74,6 +75,16 @@ flour =
 
     # Get a list of files from a wildcard path (*.ext)
     getFiles: (filepath, cb) ->
+
+        if Array.isArray filepath
+            counter = 0
+            result = []
+            end = (files) ->
+                Array::push.apply result, files
+                if filepath.length is ++counter then cb result
+            return filepath.forEach (path) ->
+                flour.getFiles path, end
+
         dir     = path.dirname filepath
         pattern = path.basename filepath
 

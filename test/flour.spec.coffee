@@ -254,6 +254,18 @@ describe 'File path handling', ->
     it 'should compile multiple files (null)', (done) ->
         flour.compile "#{dir.temp}/multi*.coffee", null, checkMultipleFiles done
 
+    it 'should bundle multiple files using patterns', (done) ->
+        output = "#{dir.temp}/bundled-pattern.js"
+        flour.bundle [
+            "#{dir.sources}/bundle-coffee/*.coffee"
+            "#{dir.sources}/multiple/*.coffee"
+        ], output, ->
+            should.exist fs.existsSync output
+            contents = readFile(output)
+            contents.should.include 'x.bundle1=function'
+            contents.should.include 'multiple 1'
+            done()
+
     it 'should lint multiple files', (done) ->
         flour.lint "#{dir.sources}/lint/*.js", (results) ->
             [a, b] = [results['lint-1.js'], results['lint-2.js']]
