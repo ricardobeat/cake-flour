@@ -78,12 +78,18 @@ flour =
 
         if Array.isArray filepath
             counter = 0
-            result = []
-            end = (files) ->
-                Array::push.apply result, files
-                if filepath.length is ++counter then cb result
-            return filepath.forEach (path) ->
-                flour.getFiles path, end
+            results = []
+            end = ->
+                return unless filepath.length is ++counter
+                # Flatten array
+                cb results.reduce (files, f, i) ->
+                    Array::push.apply files, f
+                    return files
+                , []
+            filepath.forEach (path, i) -> flour.getFiles path, (files) ->
+                results[i] = files
+                end()
+            return
 
         dir     = path.dirname filepath
         pattern = path.basename filepath
