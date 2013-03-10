@@ -222,6 +222,9 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.4.12
+- expand paths containing patterns inside `bundle()` array argument (#22)
+
 ##### v0.4.11
 - mkdir_p on compile (#20)
 
