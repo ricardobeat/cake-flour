@@ -20,7 +20,7 @@ module.exports =
             yuicompress: @yuicompress ? false
         }
 
-        parser = new less.Parser { paths: [file.dir] }
+        parser = new less.Parser { paths: [file.dir].concat(@paths ? []) }
 
         file.read (code) ->
             parser.parse code, (err, tree) ->
