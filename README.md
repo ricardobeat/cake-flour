@@ -113,10 +113,15 @@ Compiles CoffeeScript, LESS or Stylus files:
     compile 'cold.coffee', (output) ->
         console.log output.transform()
 
-You can disable compression for LESS or Stylus with
+Some compilers may accept options that will get proxied to their respective
+libraries. For example, you can disable compression for LESS or Stylus with
 
     flour.compilers.less.compress = false
     flour.compilers.styl.compress = false
+
+Or customize the LESS include path with
+
+    flour.compilers.less.paths = ['/path/to/my/less/libs/']
 
 ### Bundle
 
