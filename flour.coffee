@@ -1,9 +1,10 @@
-fs     = require 'fs'
-path   = require 'path'
-util   = require 'util'
-domain = require 'domain'
-colors = require 'colors'
-mm     = require 'minimatch'
+fs      = require 'fs'
+path    = require 'path'
+util    = require 'util'
+domain  = require 'domain'
+colors  = require 'colors'
+glob    = require 'glob'
+Q       = require 'q'
 
 File   = require './lib/file'
 logger = require './lib/logger'
@@ -83,39 +84,15 @@ flour =
 
     # Get a list of files from a wildcard path (*.ext)
     getFiles: (filepath, cb) ->
-
+        defer = Q.defer()
         if Array.isArray filepath
-            counter = 0
-            results = []
-            end = ->
-                return unless filepath.length is ++counter
-                # Flatten array
-                cb results.reduce (files, f, i) ->
-                    Array::push.apply files, f
-                    return files
-                , []
-            filepath.forEach (path, i) -> flour.getFiles path, (files) ->
-                results[i] = files
-                end()
-            return
-
-        dir     = path.dirname filepath
-        pattern = path.basename filepath
-
-        try stats = fs.statSync filepath
-
-        if stats?.isFile()
-            return cb [filepath]
-
-        if stats?.isDirectory()
-            dir = filepath
-            pattern = '*.*'
-
-        fs.readdir dir, (err, results) ->
-            throw ERROR.NOT_FOUND dir unless results
-            results = results.filter mm.filter pattern
-            results = results.map (f) -> path.join dir, f
-            cb results
+            searches = filepath.map (path) -> flour.getFiles path
+            Q.all(searches).then (searches) ->
+                defer.resolve searches.reduce (l, r) -> l.concat r, []
+        else
+            glob filepath, (er, files) -> defer.resolve files
+        defer.promise.done (files) -> cb files if cb?
+        defer.promise
 
     # Get file(s)' contents
     get: (filepath, cb) ->
