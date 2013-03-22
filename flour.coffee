@@ -83,14 +83,15 @@ flour =
         return
 
     # Get a list of files from a wildcard path (*.ext)
-    getFiles: (filepath, cb) ->
+    getFiles: (pattern, cb) ->
+        try pattern = path.join pattern, '*' if (fs.statSync pattern).isDirectory()
         defer = Q.defer()
-        if Array.isArray filepath
-            searches = filepath.map (path) -> flour.getFiles path
+        if Array.isArray pattern
+            searches = pattern.map (path) -> flour.getFiles path
             Q.all(searches).then (searches) ->
                 defer.resolve searches.reduce (l, r) -> l.concat r, []
         else
-            glob filepath, (er, files) -> defer.resolve files
+            glob pattern, (er, files) -> defer.resolve files
         defer.promise.done (files) -> cb files if cb?
         defer.promise
 
