@@ -6,7 +6,8 @@
   "dependencies": {
     "colors": "*",
     "hound": "*",
-    "minimatch": "*"
+    "glob": "*",
+    "q": "*"
   },
   "devDependencies": {
     "mocha": "*",
