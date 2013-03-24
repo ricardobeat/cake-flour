@@ -1,6 +1,8 @@
 Flour
 ==========
 
+[![NPM version](https://badge.fury.io/js/flour.png)](http://badge.fury.io/js/flour)
+
 **Flour** is a set of simple build tools for your Cakefiles.
 
 [Changelog](#changelog)
