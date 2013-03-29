@@ -126,7 +126,7 @@ flour =
                 files.forEach (f, i) ->
                     new File(f).read (output) ->
                         results[i] = output
-                        if --count is 0 then cb results
+                        if --count is 0 then cb results, files
 
         new File(filepath).read cb
 
