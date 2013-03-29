@@ -1,7 +1,7 @@
 {
   "name": "flour",
-  "version": "0.4.12",
-  "description": "Cakefile extension for simpler build scripts",
+  "version": "0.4.13",
+  "description": "Cakefile build tools.",
   "main": "flour.coffee",
   "dependencies": {
     "colors": "*",
@@ -17,7 +17,8 @@
     "less": "*",
     "stylus": "*",
     "nib": "*",
-    "csso": "*"
+    "csso": "*",
+    "handlebars": "*"
   },
   "repository": {
     "type": "git",
@@ -26,12 +27,20 @@
   "keywords": [
     "cakefile",
     "cake",
+    "task",
     "build",
+    "bundle",
     "tools",
     "watch",
     "compile",
+    "coffee-script",
     "minify",
-    "coffee-script"
+    "uglify",
+    "grunt",
+    "assets",
+    "make",
+    "jake",
+    "async"
   ],
   "scripts": {
     "test": "mocha"

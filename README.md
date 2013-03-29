@@ -101,7 +101,7 @@ Creating new adapters is very easy, take a look at the `adapters/` folder for gu
 
 ### Compile
 
-Compiles CoffeeScript, LESS or Stylus files:
+Compile CoffeeScript, LESS, Stylus, Handlebars templates:
 
     compile(file, [destination], [callback])
 
@@ -228,6 +228,10 @@ While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have
 The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.
 
 #### Changelog <a name="changelog"></a>
+
+##### v0.4.12
+- flour.minifiers.disable('js'), enables/disables all if no argument given
+- compile handlebars *.hbs templates
 
 ##### v0.4.12
 - expand paths containing patterns inside `bundle()` array argument (#22)
