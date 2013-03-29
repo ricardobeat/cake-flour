@@ -1,4 +1,5 @@
 Adapter = require './adapter'
+
 module.exports = new Adapter
 
     coffee: (file, cb) ->
