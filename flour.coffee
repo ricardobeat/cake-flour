@@ -104,6 +104,7 @@ flour =
             pattern = '*.*'
 
         fs.readdir dir, (err, results) ->
+            throw ERROR.NOT_FOUND dir unless results
             results = results.filter mm.filter pattern
             results = results.map (f) -> path.join dir, f
             cb results

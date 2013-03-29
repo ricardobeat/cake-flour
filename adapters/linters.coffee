@@ -1,4 +1,6 @@
-module.exports =
+Adapter = require './adapter'
+
+module.exports = new Adapter
 
     js: (file, cb) ->
         options = @options

@@ -1,4 +1,5 @@
-module.exports =
+Adapter = require './adapter'
+module.exports = new Adapter
 
     coffee: (file, cb) ->
         coffee = require 'coffee-script'
