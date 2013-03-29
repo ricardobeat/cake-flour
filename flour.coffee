@@ -36,30 +36,38 @@ flour =
                     logger.log pos.red, e.reason.grey
             cb? passed, errors, file
 
-    bundle: (files, dest, cb) ->
+    bundle: (files, options, dest, cb) ->
 
         return flour.getFiles files, (results) ->
             results.filepath = files
-            flour.bundleFiles results, dest, cb
+            flour.bundleFiles results, options, dest, cb
 
-    bundleFiles: (files, dest, cb) ->
+    bundleFiles: (files, options, dest, cb) ->
 
         if files.length is 0
             throw ERROR.NO_MATCH files.filepath
+
+        # No options object
+        if not dest? or typeof options isnt 'object'
+            [options, dest, cb] = [{}, options, dest]
+
+        options.wrap ?= []
 
         results = []
         counter = 0
 
         done = ->
             return unless files.length is ++counter
-            shim = new File dest, results.join("\n")
+            shim = new File dest
+            sep = if shim.ext is 'js' then "\n;" else "\n"
+            shim.buffer = [options.before] + results.join(sep) + [options.after]
             shim.minify (output) ->
                 success dest, @, output, 'Packaged', cb
 
         files.forEach (file, i) ->
             file = new File file
             file.compile (output) ->
-                results[i] = output
+                results[i] = [options.wrap[0]] + output + [options.wrap[1]]
                 done()
 
         return

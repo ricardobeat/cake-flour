@@ -214,6 +214,26 @@ describe 'Bundle', ->
             contents.should.include 'bundle2=function('
             done()
 
+    it 'should wrap compiled code', (done) ->
+        flour.bundle "#{sources_js}/*", {
+            wrap: ['TEST(', ');']
+        }, output_file, ->
+            contents = readFile output_file
+            contents.should.include 'TEST(function(){return 1})'
+            done()
+
+    it 'should add before/after strings to bundle', (done) ->
+        flour.minifiers.disable()
+        options =
+            before: '(function(n,y,c){'
+            after: '}("wrap"));'
+        flour.bundle "#{sources_js}/*", options, output_file, ->
+            contents = readFile output_file
+            contents.should.include options.before
+            contents.should.include options.after
+            flour.minifiers.enable()
+            done()
+
 describe 'File path handling', ->
 
     m1 = "#{dir.temp}/multi1.js"
