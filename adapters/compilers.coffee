@@ -46,3 +46,15 @@ module.exports = new Adapter
             renderer.render (err, css) ->
                 throw err if err
                 cb css
+
+    hbs: (file, cb) ->
+        handlebars = require 'handlebars'
+
+        options = {
+            context: @context ? 'templates'
+        }
+
+        file.read (code) ->
+            compiled = handlebars.precompile code
+            compiled = "#{options.context}['#{@base}'] = Handlebars.template(#{compiled});\n"
+            cb compiled
