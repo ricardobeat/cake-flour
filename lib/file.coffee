@@ -32,7 +32,7 @@ class File
         return cb @buffer if @buffer?
         fs.readFile @path, (err, data) =>
             throw err if err
-            cb @buffer = data.toString()
+            cb.call @, @buffer = data.toString()
 
     compile: (cb) ->
         @action = 'compiling'
