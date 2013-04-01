@@ -207,7 +207,7 @@ You can add new minifiers and compilers to `flour`:
 #### Disable the JS minifier during development
 
     task 'watch', ->
-        flour.minifiers['js'] = null
+        flour.minifiers.disable 'js'
 
         watch 'scripts/*.coffee', -> invoke 'build'
 
