@@ -234,6 +234,13 @@ describe 'Bundle', ->
             flour.minifiers.enable()
             done()
 
+    it 'should support a globstar pattern', (done) ->
+        flour.bundle "#{dir.sources}/**/*.coffee", output_file, ->
+            contents = readFile output_file
+            contents.should.include 'bundle1=function('
+            contents.should.include 'bundle2=function('
+            done()
+
 describe 'File path handling', ->
 
     m1 = "#{dir.temp}/multi1.js"
