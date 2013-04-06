@@ -3,6 +3,7 @@ fs     = require 'fs'
 path   = require 'path'
 
 flour  = require '../flour'
+File   = require '../lib/file'
 
 readFile = (file) -> fs.readFileSync(file).toString()
 copyFile = (file, out) -> fs.writeFileSync out, readFile file
@@ -239,6 +240,48 @@ describe 'Bundle', ->
             contents = readFile output_file
             contents.should.include 'bundle1=function('
             contents.should.include 'bundle2=function('
+            done()
+
+describe 'flour.get', (contents) ->
+
+    s1 = "#{dir.sources}/compile.coffee"
+    s2 = "#{dir.sources}/compile.styl"
+
+    lintall = "#{dir.sources}/lint/*"
+    lint1   = "#{dir.sources}/lint/lint-1.js"
+    lint2   = "#{dir.sources}/lint/lint-1.js"
+
+    it 'should return an instance of File', (done) ->
+        flour.get s1, (f) ->
+            this.should.be.an.instanceof File
+            done()
+
+    it 'should return a single file\'s contents', (done) ->
+        flour.get s1, (contents) ->
+            contents.should.equal readFile(s1)
+            done()
+
+    it 'should return multiple file\'s contents', (done) ->
+        flour.get [s1, s2], (res) ->
+            # contents should be available at both index and filename keys
+            should.exist res[0]
+            should.exist res[1]
+            res[0].should.equal readFile(s1)
+            res[1].should.equal readFile(s2)
+
+            should.exist res[s1]
+            should.exist res[s2]
+            res[s1].should.equal readFile(s1)
+            res[s2].should.equal readFile(s2)
+
+            done()
+
+    it 'should accept complex paths/patterns', (done) ->
+        flour.get lintall, (res) ->
+            should.exist res[lint1]
+            should.exist res[lint2]
+            res[lint1].should.equal readFile(lint1)
+            res[lint2].should.equal readFile(lint2)
             done()
 
 describe 'File path handling', ->

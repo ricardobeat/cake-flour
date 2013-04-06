@@ -96,13 +96,13 @@ flour =
 
     # Get file(s)' contents
     get: (filepath, cb) ->
-        if isWild filepath
+        if isWild(filepath) or Array.isArray(filepath)
             return flour.getFiles filepath, (files) ->
                 results = []
                 count = files.length
                 files.forEach (f, i) ->
                     new File(f).read (output) ->
-                        results[i] = output
+                        results[i] = results[f] = output
                         if --count is 0 then cb results, files
 
         new File(filepath).read cb
