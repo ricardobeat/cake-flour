@@ -7,7 +7,7 @@
     "colors": "*",
     "hound": "*",
     "glob": "*",
-    "q": "*"
+    "queue-async": "~1"
   },
   "devDependencies": {
     "mocha": "*",

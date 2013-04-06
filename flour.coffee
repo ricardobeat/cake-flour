@@ -4,13 +4,14 @@ util    = require 'util'
 domain  = require 'domain'
 colors  = require 'colors'
 glob    = require 'glob'
-Q       = require 'q'
+queue   = require 'queue-async'
 
 File   = require './lib/file'
 logger = require './lib/logger'
 ERROR  = require './lib/errors'
 
 isWild = (str) -> /[*!{}|}]/.test str
+asyncMap = (q, fn, items) -> q.defer(fn, item) for item in items; q
 
 # Main object / API
 flour =
@@ -83,17 +84,15 @@ flour =
         return
 
     # Get a list of files from a wildcard path (*.ext)
-    getFiles: (pattern, cb) ->
-        try pattern = path.join pattern, '*' if (fs.statSync pattern).isDirectory()
-        defer = Q.defer()
-        if Array.isArray pattern
-            searches = pattern.map (path) -> flour.getFiles path
-            Q.all(searches).then (searches) ->
-                defer.resolve searches.reduce (l, r) -> l.concat r, []
-        else
-            glob pattern, (er, files) -> defer.resolve files
-        defer.promise.done (files) -> cb files if cb?
-        defer.promise
+    getFiles: (patterns, cb) ->
+        paths = [].concat(patterns)
+        asyncMap(queue(), fs.stat, paths).awaitAll (err, stats) ->
+            if stats then paths = stats.map (stat, i) ->
+                path.join(paths[i], '*' if stat.isDirectory())
+
+            asyncMap(queue(), glob, paths).awaitAll (err, files) ->
+                cb Array::concat.apply [], files
+
 
     # Get file(s)' contents
     get: (filepath, cb) ->
