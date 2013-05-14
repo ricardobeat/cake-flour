@@ -1,321 +1,60 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Flour by ricardobeat</title>
+<!DOCTYPE html>
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8" />
+    <title>Flour | Javascript build tool</title>
+    <meta name="description" content="" />
+    <meta name="author" content="" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="resources/styles.css" />
+
     <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-  </head>
-  <body>
-    <div class="wrapper">
-      <header>
-        <h1>Flour</h1>
-        <p>Bake better Cakefiles</p>
 
-        <p class="view"><a href="https://github.com/ricardobeat/cake-flour">View the Project on GitHub <small>ricardobeat/cake-flour</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/ricardobeat/cake-flour/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/ricardobeat/cake-flour/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/ricardobeat/cake-flour">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>Flour</h1>
-
-<p><strong>Flour</strong> is a set of simple build tools for your Cakefiles.</p>
-
-<p><a href="#changelog">Changelog</a></p>
-
-<p><img src="http://i.imgur.com/yIxF9.jpg" alt="image"></p>
-
-<h2>Usage</h2>
-
-<p>Add <code>flour</code> and your required pre-processors/compilers to your <code>package.json</code>:</p>
-
-<pre><code>{
-  "name": "dancingrobot",
-  ...
-  "dependencies": {
-    "flour": "",
-    "uglify-js": "",
-    "coffee-script": ""
-  },
-  ...
-}
-</code></pre>
-
-<p>Then run <code>npm install</code>, and <code>require 'flour'</code> at the top of your Cakefile. A few methods are available in the global scope.</p>
-
-<p>This is what a typical Cakefile could look like:</p>
-
-<pre><code>require 'flour'
-
-task 'build:coffee', -&gt;
-    compile 'coffee/app.coffee', 'js/app.js'
-
-task 'build:less', -&gt;
-    compile 'less/main.less', 'css/main.css'
-
-task 'build:plugins', -&gt;
-    bundle [
-        'vendor/underscore.js'
-        'vendor/hogan.js'
-        'vendor/backbone.js'
-    ], 'js/plugins.js'
-
-task 'build', -&gt;
-    invoke 'build:plugins'
-    invoke 'build:coffee'
-    invoke 'build:less
-
-task 'watch', -&gt;
-    invoke 'build:less'
-    invoke 'build:coffee'
-
-    watch 'less/*.less', -&gt; invoke 'build:less'
-    watch 'coffee/app.coffee', -&gt; invoke 'build:coffee'
-
-task 'lint', 'Check javascript syntax', -&gt;
-    lint 'js/feature.js'
-</code></pre>
-
-<p>(if the global pollution hurts your feelings you can remove them with <code>flour.noConflict()</code>. That will bring the global object back to it's previous state)</p>
-
-<p>Each of these functions accepts either a file path or a list of files. Simple wildcard paths (<code>*.xxx</code>) are allowed. For example:</p>
-
-<pre><code>watch [
-    'less/main.less'
-    'less/reset.less'
-    'less/print.less'
-], -&gt; invoke 'build:less'
-</code></pre>
-
-<p>You can also access the resulting output by passing a callback:</p>
-
-<pre><code>compile 'coffee/app.coffee', (output) -&gt;
-    # do something with the compiled output
-    mail.send subject: 'Project file', to: 'grandma@hotmail.com', body: output
-
-# verify the CoffeeScript compiler output
-compile 'coffee/app.coffee', 'js/app.js', -&gt; lint 'js/app.js'
-</code></pre>
-
-<h2>Adapters</h2>
-
-<p>These are the current adapters and the required modules:</p>
-
-<h3>Compilers</h3>
-
-<ul>
-<li>CoffeeScript: <code>coffee-script</code>
-</li>
-<li>LESS: <code>less</code>
-</li>
-<li>Stylus: <code>stylus</code>
-</li>
-</ul><h3>Minifiers</h3>
-
-<ul>
-<li>Javascript: <code>uglify-js</code>
-</li>
-</ul><h3>Linters</h3>
-
-<ul>
-<li>Javascript: 'jshint'</li>
-</ul><p>Creating new adapters is very easy, take a look at the <code>adapters/</code> folder for guidance.</p>
-
-<h2>Reference</h2>
-
-<h3>Compile</h3>
-
-<p>Compiles CoffeeScript, LESS or Stylus files:</p>
-
-<pre><code>compile(file, [destination], [callback])
-</code></pre>
-
-<h5>Usage</h5>
-
-<pre><code>compile 'app.coffee', 'app.js'
-
-compile 'cold.coffee', 'app.js', (output) -&gt;
-    console.log 'Done!'
-
-compile 'cold.coffee', (output) -&gt;
-    console.log output.transform()
-</code></pre>
-
-<p>You can disable compression for LESS or Stylus with</p>
-
-<pre><code>flour.compilers.less.compress = false
-flour.compilers.styl.compress = false
-</code></pre>
-
-<h3>Bundle</h3>
-
-<p>Compile, minify and join a set of files:</p>
-
-<pre><code>bundle(files, destination)
-</code></pre>
-
-<h5>Usage</h5>
-
-<pre><code>// preservers the list order
-bundle [
-    'lib/jquery.js'
-    'lib/underscore.js'
-    'lib/backbone.js'
-], 'js/bundle.js'
-
-// system-dependent order
-bundle 'js/*.js', 'js/all.js'
-</code></pre>
-
-<h3>Watch</h3>
-
-<p>Watch files for changes:</p>
-
-<pre><code>watch(files, action)
-</code></pre>
-
-<h5>Usage</h5>
-
-<pre><code>watch 'src/app.coffee', -&gt;
-    compile 'lib/app.js'
-
-# best used with predefined tasks:
-
-task 'build', -&gt;
-    bundle '*.coffee', 'app.js'
-
-task 'watch', -&gt;
-    watch [
-        'modules.coffee'
-        'user.coffee'
-        'main.coffee'
-    ], -&gt;
-        invoke 'build'
-
-# or simply
-task 'watch', -&gt;
-    watch '*.coffee', -&gt; invoke 'build'
-</code></pre>
-
-<h3>Lint</h3>
-
-<p>Check file syntax (uses <a href="http://jshint.com">JSHint</a>):</p>
-
-<pre><code>lint(file, [options], [globals]) # see http://www.jshint.com/options/
-</code></pre>
-
-<h4>Usage</h4>
-
-<pre><code>task 'lint', -&gt;
-
-    lint 'scripts/*.js'
-</code></pre>
-
-<h3>Minify</h3>
-
-<p>Minify files (currently only Javascript using <a href="https://github.com/mishoo/UglifyJS">UglifyJS</a>):</p>
-
-<pre><code>minify(file, [destination], [callback])
-</code></pre>
-
-<h2>Extensibility</h2>
-
-<p>You can add new minifiers and compilers to <code>flour</code>:</p>
-
-<pre><code>flour.minifiers['dumb'] = (file, cb) -&gt;
-    file.read (code) -&gt;
-        cb code.replace(/\s*/, '')
-
-flour.compilers['odd'] = (file, cb) -&gt;
-    odd = require 'odd-lib'
-    file.read (code) -&gt;
-        cb odd.compile code
-</code></pre>
-
-<h2>Tips</h2>
-
-<h4>Disable the JS minifier during development</h4>
-
-<pre><code>task 'watch', -&gt;
-    flour.minifiers['js'] = null
-
-    watch 'scripts/*.coffee', -&gt; invoke 'build'
-</code></pre>
-
-<h4>Pre-compile Hogan templates</h4>
-
-<pre><code>flour.compilers['mustache'] = (file, cb) -&gt;
-    hogan = require 'hogan.js'
-    file.read (code) -&gt;
-        cb "App.templates['#{file.base}']=${hogan.compile code, asString: true};"
-
-task 'build:templates', -&gt;
-    bundle 'views/*.mustache', 'resources/views.js'
-</code></pre>
-
-<h2>Why use flour?</h2>
-
-<p>While Grunt, brewerjs, H5BP-build-script, Yeoman and other similar projects have the same (and some more advanced) capabilities, they are increasingly complex to setup.</p>
-
-<p>The goal of Flour is to provide a small and simple API that caters for the most common build tasks, without requiring you to adjust your project structure, install command-line tools or create long configuration files.</p>
-
-<h4>Changelog <a name="changelog"></a>
-</h4>
-
-<h5>v0.4.0</h5>
-
-<ul>
-<li>tests!</li>
-<li>fix file buffer bug</li>
-<li>accept options for adapters, enables disabling compression for LESS and Stylus</li>
-</ul><h5>v0.3.3</h5>
-
-<ul>
-<li>bugfixes</li>
-</ul><h5>v0.3.2</h5>
-
-<ul>
-<li>add <a href="http://github.com/beefsack/node-hound">node-hound</a> as a dependency for file watching</li>
-<li>watch whole directory trees: <code>watch</code>src/`, -&gt; invoke 'build' (listens for new files and deletes too)</li>
-<li>fix error handlers leak</li>
-</ul><h5>v0.3.1</h5>
-
-<ul>
-<li>fix extension handling bug</li>
-</ul><h5>v0.3.0</h5>
-
-<ul>
-<li>flour doesn't install it's adapter dependencies anymore, it's up to you to add them to your project's <code>package.json</code>
-</li>
-</ul>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/ricardobeat">ricardobeat</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+    <link rel="shortcut icon" href="images/favicon.ico" />
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png" />
+</head>
+<body>
+
+    <header id="header">
+        <div class="container">
+            <div class="sixteen columns inner">
+                <img src="images/flour.png" alt="" class="logo" />
+                <h1>flowr</h1>
+            </div>
+            <div class="twelve columns">
+                <p class="description">
+                    Flowr is a set of build tools for javascript projects. Automate asset bundling, compiling, minifying,
+                    tests and source transformations effortlessly. Tasks are automatically parallelized for maximum performance.
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container" id="content">
+        <div class="eight columns">
+            <h2>Batteries included</h2>
+            <p>Skeleton is a small collection of well-organized CSS files that can help you rapidly develop sites that look beautiful at any size, be it a 17" laptop screen or an iPhone. It's based on a responsive grid, but also provides very basic CSS for typography, buttons, forms and media queries. Go ahead, resize this super basic page to see the grid in action.</p>
+        </div>
+        <div class="eight columns">
+            <pre><code data-language="javascript">
+                function bacon () {}
+            </code></pre>
+        </div>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
-              <script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-          </script>
-          <script type="text/javascript">
-            try {
-              var pageTracker = _gat._getTracker("UA-21731259-4");
-            pageTracker._trackPageview();
-            } catch(err) {}
-          </script>
 
-  </body>
+    <script src="vendor/rainbow/rainbow.js"></script>
+    <script src="vendor/rainbow/language/generic.js"></script>
+    <script src="vendor/rainbow/language/coffeescript.js"></script>
+    <script src="vendor/rainbow/language/javascript.js"></script>
+
+</body>
 </html>
