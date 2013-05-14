@@ -229,7 +229,11 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
-##### v0.4.12
+##### v0.5.1
+- pass through all options to adapters. white-listing is not mantainable.
+- add markdown compiler
+
+##### v0.5
 - flour.minifiers.disable('js'), enables/disables all if no argument given
 - compile handlebars *.hbs templates
 
