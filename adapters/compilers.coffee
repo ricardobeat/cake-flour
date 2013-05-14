@@ -5,10 +5,9 @@ module.exports = new Adapter
     coffee: (file, cb) ->
         coffee = require 'coffee-script'
 
-        options = {
-            bare: @bare ? false
-            filename: file.path
-            header: @header ? false
+        options = Adapter.getOptions this, {
+            bare     : false
+            filename : file.path
         }
 
         file.read (code) ->
@@ -21,9 +20,9 @@ module.exports = new Adapter
     less: (file, cb) ->
         less = require 'less'
 
-        options = {
-            compress: @compress ? (not @yuicompress)
-            yuicompress: @yuicompress ? false
+        options = Adapter.getOptions this, {
+            compress    : (not @yuicompress)
+            yuicompress : false
         }
 
         parser = new less.Parser { paths: [file.dir].concat(@paths ? []) }
@@ -37,14 +36,13 @@ module.exports = new Adapter
         stylus = require 'stylus'
         try nib = require 'nib'
 
-        options = {
-            filename: file.name
-            paths: [file.dir]
-            compress: @compress ? true
+        options = Adapter.getOptions this, {
+            filename : file.name
+            paths    : [file.dir]
+            compress : true
         }
 
         file.read (code) ->
-
             renderer = stylus code, options
             renderer.use nib() if nib?
 
@@ -55,7 +53,7 @@ module.exports = new Adapter
     md: (file, cb) ->
         marked = require 'marked'
 
-        marked.setOptions Adapter.getOptions(this)
+        marked.setOptions Adapter.getOptions this
 
         file.read (code) ->
             compiled = marked code
@@ -64,8 +62,8 @@ module.exports = new Adapter
     hbs: (file, cb) ->
         handlebars = require 'handlebars'
 
-        options = {
-            context: @context ? 'templates'
+        options = Adapter.getOptions this, {
+            context: 'templates'
         }
 
         file.read (code) ->

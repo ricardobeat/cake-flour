@@ -16,9 +16,10 @@ class Adapter
         else @disabled = @disabled.filter (e) -> e isnt ext
 
 
-Adapter.getOptions = (self) ->
+Adapter.getOptions = (self, defaults) ->
     options = {}
     options[key] = val for own key, val of self
+    options[key] ?= val for own key, val of defaults
     return options
 
 module.exports = Adapter
