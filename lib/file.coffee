@@ -67,6 +67,8 @@ class File
         switch @ext
             when 'less', 'styl' then 'css'
             when 'coffee'       then 'js'
+            when 'hbs'          then 'js'
+            when 'md'           then 'html'
 
     target: (dir) ->
         path.join dir or @dir, "#{@base}.#{@targetExtension()}"
