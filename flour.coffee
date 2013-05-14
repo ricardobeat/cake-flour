@@ -88,7 +88,7 @@ flour =
         paths = [].concat(patterns)
         asyncMap(queue(), fs.stat, paths).awaitAll (err, stats) ->
             if stats then paths = stats.map (stat, i) ->
-                path.join(paths[i], '*' if stat.isDirectory())
+                path.join(paths[i], if stat.isDirectory() then '*' else '')
 
             asyncMap(queue(), glob, paths).awaitAll (err, files) ->
                 cb Array::concat.apply [], files
