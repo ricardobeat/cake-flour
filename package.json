@@ -19,7 +19,8 @@
     "stylus": "*",
     "nib": "*",
     "csso": "*",
-    "handlebars": "*"
+    "handlebars": "*",
+    "require-tree": "*"
   },
   "repository": {
     "type": "git",
