@@ -13,3 +13,9 @@ results
 
 node_modules
 npm-debug.log
+
+.DS_Store
+
+scripts/
+stylesheets/
+vendor/
