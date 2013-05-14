@@ -48,6 +48,15 @@ module.exports = new Adapter
                 throw err if err
                 cb css
 
+    md: (file, cb) ->
+        marked = require 'marked'
+
+        marked.setOptions Adapter.getOptions(this)
+
+        file.read (code) ->
+            compiled = marked code
+            cb compiled
+
     hbs: (file, cb) ->
         handlebars = require 'handlebars'
 
