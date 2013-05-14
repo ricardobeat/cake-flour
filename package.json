@@ -1,0 +1,15 @@
+{
+  "name": "flour-website",
+  "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "main": "",
+  "dependencies": {},
+  "devDependencies": {
+    "flour": "*",
+    "stylus": "*",
+    "uglify-js": "*"
+  },
+  "author": "Ricardo Tomasi",
+  "license": ""
+}
