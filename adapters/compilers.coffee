@@ -12,7 +12,11 @@ module.exports = new Adapter
         }
 
         file.read (code) ->
-            cb coffee.compile code, options
+            compiled = coffee.compile code, options
+            if compiled.js?
+                cb compiled.js, compiled
+            else
+                cb compiled
 
     less: (file, cb) ->
         less = require 'less'
