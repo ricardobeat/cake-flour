@@ -24,3 +24,10 @@ describe 'CoffeeScript compiler', ->
             should.exist fs.existsSync output_file
             res.should.include 'bacon = function'
             done()
+
+    it 'should forward options', (done) ->
+        flour.compilers.coffee.bare = true
+        flour.compile input_file, output_file, (output) ->
+            console.log output
+            output.slice(0,9).should.equal 'var bacon'
+            done()
