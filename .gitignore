@@ -19,3 +19,6 @@ npm-debug.log
 scripts/
 stylesheets/
 vendor/
+images/
+resources/
+Cakefile
