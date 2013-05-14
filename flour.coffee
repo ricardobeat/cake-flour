@@ -20,12 +20,14 @@ flour =
         logger.silent = state
 
     compile: (file, dest, cb) ->
-        file.compile (output) ->
-            success dest, @, output, 'Compiled', cb
+        file.compile (output, obj) ->
+            # Support coffee-script source maps
+            sourceMap = obj?.v3SourceMap
+            success dest, @, output, sourceMap, 'Compiled', cb
 
     minify: (file, dest, cb) ->
         file.minify (output) ->
-            success dest, @, output, 'Minified', cb
+            success dest, @, output, null, 'Minified', cb
 
     lint: (file, cb) ->
         file.lint (passed, errors) ->
@@ -64,7 +66,7 @@ flour =
             sep = if shim.ext is 'js' then "\n;" else "\n"
             shim.buffer = [options.before] + results.join(sep) + [options.after]
             shim.minify (output) ->
-                success dest, @, output, 'Packaged', cb
+                success dest, @, output, null, 'Packaged', cb
 
         files.forEach (file, i) ->
             file = new File file
@@ -114,7 +116,7 @@ flour =
 
 # Success handler. Writes to file if an output path was
 # provided, otherwise it just returns the result
-success = (dest, file, output, action, cb) ->
+success = (dest, file, output, sourceMap, action, cb) ->
 
     # flour.compile 'file.js', (output) ->
     if typeof dest is 'function'
@@ -154,6 +156,11 @@ success = (dest, file, output, action, cb) ->
 
     if dest?
         dest = path.join process.cwd(), dest
+        if sourceMap?
+            map_name = path.basename(dest) + '.map'
+            map_dest = path.join(path.dirname(dest), map_name)
+            fs.writeFile map_dest, sourceMap
+            output += "\n/*\n//@ sourceMappingURL=#{map_name}\n*/\n"
         fs.writeFile dest, output, (err) -> cb? output, file
     else
         cb? output, file
