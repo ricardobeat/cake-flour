@@ -65,7 +65,7 @@ task 'build:coffee', ->
         <div class="row">
             <div class="eight columns">
                 <h2>Compile, Pre-process, Lint & Minify</h2>
-                <p>Flour packs it's own adapters for the most popular tools. The <code>compile</code> and <code>minify</code> method can detect file types and choose the appropriate compiler, so you don't need to memorize a dozen different methods.</p>
+                <p>Flour packs it's own adapters for the most popular tools. The <code>compile</code> and <code>minify</code> methods can detect file types and choose the appropriate compiler, so you don't need to memorize a dozen different methods.</p>
             </div>
             <div class="eight columns">
                 <pre class="reference"><code data-language="coffeescript">task 'build', ->
@@ -118,14 +118,15 @@ task 'build:source', ->
     ], -> invoke 'build:templates'</code></pre>
             </div>
         </div>
-        <hr />
-        <div class="row">
-            <div class="sixteen columns">
-                <p>See <a href="//github.com/ricardobeat/cake-flour">the source on Github</a></p>
-                <p>Follow <a href="//twitter.com/ricardobeat">@ricardobeat</a> on Twitter</p>
-            </div>
-        </div>
     </div>
+
+    <footer id="footer">
+        <div class="container">
+            <p><code>npm install flour --save-dev</code></p>
+            <p>See <a href="//github.com/ricardobeat/cake-flour">the source and documentation on Github</a></p>
+            <p>Follow <a href="//twitter.com/ricardobeat">@ricardobeat</a> on Twitter</p>
+        </div>
+    </footer>
 
     <script src="vendor/rainbow/rainbow.js"></script>
     <script src="vendor/rainbow/language/generic.js"></script>
