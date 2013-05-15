@@ -48,17 +48,8 @@
                 <p>flour works within a <a href="http://coffeescript.org/#cake">Cakefile</a>. Work for supporting other build systems like jake, grunt, etc. is underway.</p>
             </div>
             <div class="eight columns">
-                <pre class="reference"><code data-language="coffeescript">npm install flour
-npm install coffee-script uglify-js stylus</code></pre>
-                <pre class="reference"><code data-language="coffeescript">flour = require 'flour'
-
-task 'build:coffee', ->
-    # Compile CoffeeScript
-    compile 'app.coffee', 'app.js'
-    # Minify CSS
-    minify 'themes/obsidian.css', 'styles/theme.min.css'
-    # Concat & minify
-    bundle '*.js', 'everything.min.js'</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{install.sh}}</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{batteries.coffee}}</code></pre>
             </div>
         </div>
         <hr />
@@ -68,15 +59,9 @@ task 'build:coffee', ->
                 <p>Flour packs it's own adapters for the most popular tools. The <code>compile</code> and <code>minify</code> method can detect file types and choose the appropriate compiler, so you don't need to memorize a dozen different methods.</p>
             </div>
             <div class="eight columns">
-                <pre class="reference"><code data-language="coffeescript">task 'build', ->
-    compile 'layout.styl', 'layout.css' # Stylus
-    compile 'layout.less', 'layout.css' # LESS
-    compile 'layout.*', 'layout.css'    # either!</code></pre>
-                <pre class="reference"><code data-language="coffeescript">task 'minify', ->
-    minify 'styles/*.css', 'build/styles/*'
-    minify 'scripts/*.js', 'build/scripts/*'</code></pre>
-                <pre class="reference"><code data-language="coffeescript">task 'lint', ->
-    lint 'sources/*.js'</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{compile.coffee}}</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{minify.coffee}}</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{lint.coffee}}</code></pre>
             </div>
         </div>
         <hr />
@@ -87,19 +72,7 @@ task 'build:coffee', ->
                 <p>Every method in flour can take a single file path, an array of files or a glob pattern (using <a href="https://github.com/isaacs/node-glob">node-glob</a>).</p>
             </div>
             <div class="eight columns">
-                <pre class="reference"><code data-language="coffeescript">task 'build:vendor', ->
-    bundle [
-        'vendor/underscore.js'
-        'vendor/zepto.js'
-        'vendor/backbone.js'
-    ], 'build/vendor.js'
-
-task 'build:source', ->
-    bundle [
-        'sources/bootstrap.coffee'
-        'sources/app.coffee'
-        'sources/views/*.coffee'
-    ], 'build/app.js'</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{bundle.coffee}}</code></pre>
             </div>
         </div>
         <hr />
@@ -109,13 +82,7 @@ task 'build:source', ->
                 <p>No dependency detection wizardry - you are in control. Watch files, directories or glob patterns, group and invoke your tasks of choice.</p>
             </div>
             <div class="eight columns">
-                <pre class="reference"><code data-language="coffeescript">task 'watch', ->
-    watch 'sources/*.js', -> invoke 'build:source'
-    watch 'styles/*', -> invoke 'build:styles'
-    watch [
-        'content/**/*.html'
-        'views/*'
-    ], -> invoke 'build:templates'</code></pre>
+                <pre class="reference"><code data-language="coffeescript">{{watch.coffee}}</code></pre>
             </div>
         </div>
         <hr />
