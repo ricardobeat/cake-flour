@@ -52,7 +52,9 @@ flour =
             throw ERROR.NO_MATCH files.filepath
 
         # No options object
-        if not dest? or typeof options isnt 'object'
+        if typeof options is 'function'
+            [options, dest, cb] = [{}, undefined, options]
+        else if not dest? or typeof options isnt 'object'
             [options, dest, cb] = [{}, options, dest]
 
         options.wrap ?= []
