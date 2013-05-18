@@ -164,10 +164,9 @@ success = (dest, file, output, sourceMap, action, cb) ->
             fs.writeFile map_dest, sourceMap
             output += "\n/*\n//@ sourceMappingURL=#{map_name}\n*/\n"
         fs.writeFile dest, output, (err) -> cb? output, file
+        logger.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
     else
         cb? output, file
-
-    logger.log "#{action.magenta} #{file} @ #{new Date().toLocaleTimeString()}"
 
 # Overwrite all methods that accept a file parameter to:
 #   - accept both arrays and *.xxx paths
