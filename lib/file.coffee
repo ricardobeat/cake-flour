@@ -69,6 +69,7 @@ class File
             when 'coffee'       then 'js'
             when 'hbs'          then 'js'
             when 'md'           then 'html'
+            else @ext
 
     target: (dir) ->
         path.join dir or @dir, "#{@base}.#{@targetExtension()}"

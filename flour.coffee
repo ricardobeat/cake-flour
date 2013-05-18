@@ -62,10 +62,16 @@ flour =
         results = []
         counter = 0
 
+        separators = {
+            js: "\n;"
+        }
+
         done = ->
             return unless files.length is ++counter
-            shim = new File dest
-            sep = if shim.ext is 'js' then "\n;" else "\n"
+            # Use first file to find out output extension
+            shim = new File files[0]
+            shim.ext = shim.targetExtension()
+            sep = separators[shim.ext] ? "\n"
             shim.buffer = [options.before] + results.join(sep) + [options.after]
             shim.minify (output) ->
                 success dest, @, output, null, 'Packaged', cb
