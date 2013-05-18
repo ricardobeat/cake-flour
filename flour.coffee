@@ -126,7 +126,7 @@ success = (dest, file, output, sourceMap, action, cb) ->
         dest = undefined
 
     # Handle special path cases
-    dest = do ->
+    if dest isnt undefined then dest = do ->
         # Destination is `*` or nil, use file's own path
         # (`compile 'file.js', '*'`)
         return file.target() if dest in ['*', '.', ''] or dest is null
