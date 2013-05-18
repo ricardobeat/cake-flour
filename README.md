@@ -229,8 +229,11 @@ The goal of Flour is to provide a small and simple API that caters for the most 
 
 #### Changelog <a name="changelog"></a>
 
+##### v0.5.3
+- enable options forwarding for minifiers
+
 ##### v0.5.2
-- fix for coffeescript sourcemap support
+- coffeescript sourcemap support
 
 ##### v0.5.1
 - pass through all options to adapters. white-listing is not mantainable.

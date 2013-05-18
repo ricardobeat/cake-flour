@@ -1,6 +1,6 @@
 {
   "name": "flour",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Cakefile build tools.",
   "main": "flour.coffee",
   "dependencies": {
