@@ -188,6 +188,12 @@ describe 'File path handling', ->
         fs.unlinkSync m2
         done()
 
+    it 'should compile multiple files (array)', (done) ->
+        flour.compile [
+            "#{dir.sources}/multiple/multi1.coffee"
+            "#{dir.sources}/multiple/multi2.coffee"
+        ], "#{dir.temp}", checkMultipleFiles done
+
     it 'should compile multiple files (*)', (done) ->
         flour.compile "#{dir.temp}/multi*.coffee", "*", checkMultipleFiles done
 
