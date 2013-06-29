@@ -5,9 +5,9 @@
   "main": "flour.coffee",
   "dependencies": {
     "colors": "*",
-    "hound": "*",
     "glob": "*",
-    "queue-async": "~1"
+    "queue-async": "~1",
+    "gaze": "~0.3.4"
   },
   "devDependencies": {
     "mocha": "*",

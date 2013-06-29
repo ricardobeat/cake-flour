@@ -1,10 +1,11 @@
-fs      = require 'fs'
-path    = require 'path'
-util    = require 'util'
-domain  = require 'domain'
-colors  = require 'colors'
-glob    = require 'glob'
-queue   = require 'queue-async'
+fs     = require 'fs'
+path   = require 'path'
+util   = require 'util'
+domain = require 'domain'
+colors = require 'colors'
+glob   = require 'glob'
+queue  = require 'queue-async'
+gaze   = require 'gaze'
 
 File   = require './lib/file'
 logger = require './lib/logger'
@@ -85,7 +86,8 @@ flour =
         return
 
     watch: (file, fn) ->
-        file.watch fn
+        logger.log "Watching".green, f for f in [].concat(file)
+        gaze(file).on('all', fn)
 
     noConflict: ->
         for m in globals
@@ -178,7 +180,7 @@ success = (dest, file, output, sourceMap, action, cb) ->
 #   - accept both arrays and *.xxx paths
 #   - capture errors using domains
 #   - feed the original method a File instance
-['lint', 'compile', 'minify', 'watch'].forEach (method) ->
+['lint', 'compile', 'minify'].forEach (method) ->
 
     original = flour[method]
 

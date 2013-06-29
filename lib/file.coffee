@@ -1,7 +1,7 @@
 fs     = require 'fs'
 path   = require 'path'
 domain = require 'domain'
-hound  = require 'hound'
+gaze   = require 'gaze'
 
 logger = require './logger'
 
@@ -55,9 +55,7 @@ class File
     watch: (fn) ->
         fn = fn.bind @
         try
-            @watcher = hound.watch @path
-            for evt in ['create', 'change', 'delete']
-                @watcher.on evt, fn
+            gaze(@path).on('all', fn)
             logger.log "Watching".green, @path
         catch e
             logger.fail 'watching', @path, e
