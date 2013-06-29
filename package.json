@@ -20,7 +20,8 @@
     "nib": "*",
     "csso": "*",
     "handlebars": "*",
-    "require-tree": "*"
+    "require-tree": "*",
+    "marked": "~0.2.9"
   },
   "repository": {
     "type": "git",
