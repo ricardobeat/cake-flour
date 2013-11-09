@@ -69,8 +69,8 @@ flour =
 
         done = ->
             return unless files.length is ++counter
-            # Use first file to find out output extension
-            shim = new File files[0]
+            # Use destination or first file to find out output extension
+            shim = new File(dest || files[0])
             shim.ext = shim.targetExtension()
             sep = separators[shim.ext] ? "\n"
             shim.buffer = [options.before] + results.join(sep) + [options.after]
