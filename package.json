@@ -1,7 +1,7 @@
 {
   "name": "flour",
-  "version": "0.5.6",
-  "description": "Cakefile build tools.",
+  "version": "0.5.7",
+  "description": "Javascript build tools based on coffee-script & cake",
   "main": "index.js",
   "dependencies": {
     "colors": "*",
