@@ -3,9 +3,12 @@ class Adapter
     constructor: (@adapters) ->
         @disabled = []
         for ext, adapter of @adapters
-            do (ext) =>
-                Object.defineProperty @, ext,
-                    get: -> @adapters[ext] if ext not in @disabled
+            @install ext, adapter
+
+    install: (ext, adapter) ->
+        Object.defineProperty @, ext,
+            configurable: yes
+            get: -> adapter if ext not in @disabled
 
     disable: (ext) ->
         if not ext then @disabled.push ext for ext of @adapters

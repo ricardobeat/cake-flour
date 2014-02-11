@@ -9,13 +9,9 @@ logger = require './logger'
 
 passthrough = (file, args..., cb) -> file.read cb
 
-minifiers = require '../adapters/minifiers'
-compilers = require '../adapters/compilers'
-linters   = require '../adapters/linters'
-
 class File
 
-    constructor: (file, @buffer) ->
+    constructor: (file, @context, @buffer) ->
         @path = file
         @ext  = path.extname(file).replace /^\./, ''
         @name = path.basename file
@@ -36,19 +32,19 @@ class File
 
     compile: (cb) ->
         @action = 'compiling'
-        compiler = compilers[@ext] or passthrough
+        compiler = @context.compilers[@ext] or passthrough
         @domain.run =>
             compiler.call compiler, @, cb.bind(@)
 
     minify: (cb) ->
         @action = 'minifying'
-        minifier = minifiers[@ext] or passthrough
+        minifier = @context.minifiers[@ext] or passthrough
         @domain.run =>
             minifier.call minifier, @, cb.bind(@)
 
     lint: (cb) ->
         @action = 'linting'
-        linter = linters[@ext] or passthrough
+        linter = @context.linters[@ext] or passthrough
         @domain.run =>
             linter.call linter, @, cb.bind(@)
 
