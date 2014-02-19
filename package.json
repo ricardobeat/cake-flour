@@ -1,6 +1,6 @@
 {
   "name": "flour",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "Javascript build tools based on coffee-script & cake",
   "main": "index.js",
   "dependencies": {
