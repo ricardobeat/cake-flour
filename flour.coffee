@@ -70,7 +70,7 @@ flour =
         done = ->
             return unless files.length is ++counter
             # Use destination or first file to find out output extension
-            shim = new File(dest || files[0])
+            shim = new File(dest || files[0], flour)
             shim.ext = shim.targetExtension()
             sep = separators[shim.ext] ? "\n"
             shim.buffer = [options.before] + results.join(sep) + [options.after]
@@ -78,7 +78,7 @@ flour =
                 success dest, @, output, null, 'Packaged', cb
 
         files.forEach (file, i) ->
-            file = new File file
+            file = new File file, flour
             file.compile (output) ->
                 results[i] = [options.wrap[0]] + output + [options.wrap[1]]
                 done()
@@ -113,11 +113,11 @@ flour =
                 results = []
                 count = files.length
                 files.forEach (f, i) ->
-                    new File(f).read (output) ->
+                    new File(f, flour).read (output) ->
                         results[i] = results[f] = output
                         if --count is 0 then cb results, files
 
-        new File(filepath).read cb
+        new File(filepath, flour).read cb
 
     # Load adapters
     minifiers : require './adapters/minifiers'
@@ -209,13 +209,13 @@ success = (dest, file, output, sourceMap, action, cb) ->
 
             for file, i in files
                 rest[rest.length-1] = proxy_cb i if proxy_cb
-                dm.bind(original).apply flour, [new File file].concat(rest)
+                dm.bind(original).apply flour, [new File(file, flour)].concat(rest)
 
             return
 
         # Create a File object with the given path. If it turns out
         # to be a wildcard path, we just discard it.
-        file = new File files
+        file = new File files, flour
 
         # Handle wildcard paths.
         if isWild file.base
