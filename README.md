@@ -116,10 +116,14 @@ Compile CoffeeScript, LESS, Stylus, Handlebars templates:
         console.log output.transform()
 
 Some compilers may accept options that will get proxied to their respective
-libraries. For example, you can disable compression for LESS or Stylus with
+libraries. For example, you can disable compression for LESS or Stylus:
 
     flour.compilers.less.compress = false
     flour.compilers.styl.compress = false
+
+Enable source maps for the CoffeeScript compiler:
+
+    flour.compilers.coffee.sourceMap = on
 
 Or customize the LESS include path with
 
