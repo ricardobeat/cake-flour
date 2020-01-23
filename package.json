@@ -21,7 +21,7 @@
     "csso": "*",
     "handlebars": "*",
     "require-tree": "*",
-    "marked": "~0.2.9"
+    "marked": ">=0.3.18"
   },
   "repository": {
     "type": "git",
